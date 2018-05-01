@@ -4,24 +4,30 @@ extern crate termion;
 use std::io;
 use std::thread;
 use std::sync::mpsc;
+use std::fs::read_dir;
+use std::path::Path;
+use std::path::PathBuf;
 
 use termion::event;
 use termion::input::TermRead;
 
 use tui::Terminal;
 use tui::backend::MouseBackend;
-use tui::widgets::{Block, Borders, Widget};
+use tui::widgets::{Block, Borders, Widget, SelectableList};
 use tui::layout::{Direction, Group, Rect, Size};
+use tui::style::{Color, Modifier, Style};
 
 
-struct App{
+struct App<'a>{
     size: Rect,
+    items: Vec<&'a str>
 }
 
-impl App {
-    pub fn new() -> App {
+impl<'a> App<'a> {
+    pub fn new() -> App<'a> {
         App {
             size: Rect::default(),
+            items: vec!["item1", "item2"],
         }
     }
 }
@@ -81,14 +87,26 @@ fn main() {
 fn draw(t: &mut Terminal<MouseBackend>, app: &App) {
     Group::default()
         .direction(Direction::Horizontal)
-        .sizes(&[Size::Percent(10), Size::Percent(80), Size::Percent(10)])
+        .sizes(&[Size::Percent(20), Size::Percent(40), Size::Percent(40)])
         .render(t, &app.size, |t, chunks| {
-            Block::default()
-                .title("Block")
-                .borders(Borders::ALL)
+            let style = Style::default().fg(Color::White).bg(Color::Black);
+            let paths = read_dir("./").unwrap();
+            let items = paths.map(|e| {
+                match e {
+                    Ok(entry) => entry.path(),
+                    _ => PathBuf::new(),
+                }
+            }).collect::<Vec<_>>();
+            SelectableList::default()
+                .block(Block::default().title("Previous").borders(Borders::ALL))
+                .items(&app.items)
                 .render(t, &chunks[0]);
             Block::default()
-                .title("Block")
+                .title("Curret")
+                .borders(Borders::ALL)
+                .render(t, &chunks[1]);
+            Block::default()
+                .title("Preview")
                 .borders(Borders::ALL)
                 .render(t, &chunks[2]);
         });
