@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate tui;
 extern crate termion;
 
@@ -5,7 +6,7 @@ use std::io;
 use std::thread;
 use std::sync::mpsc;
 use std::fs::read_dir;
-use std::path::Path;
+//use std::path::Path;
 use std::path::PathBuf;
 
 use termion::event;
@@ -13,9 +14,9 @@ use termion::input::TermRead;
 
 use tui::Terminal;
 use tui::backend::MouseBackend;
-use tui::widgets::{Block, Borders, Widget, SelectableList, List};
+use tui::widgets::{Block, Borders, Widget, SelectableList, Tabs};
 use tui::layout::{Direction, Group, Rect, Size};
-use tui::style::{Color, Modifier, Style};
+use tui::style::{Color, Style};
 
 enum Event {
     Input(event::Key),
@@ -137,10 +138,17 @@ fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, area: &
 
 fn draw(t: &mut Terminal<MouseBackend>, app: &mut App) {
     Group::default()
-        .direction(Direction::Horizontal)
-        .sizes(&[Size::Fixed(0), Size::Min(0)])
+        .direction(Direction::Vertical)
+        .sizes(&[Size::Fixed(3), Size::Min(0)])
         .render(t, &app.size, |mut t, chunks|{
-            draw_tab(&mut t, &app.tabs[app.selected_tab], app.selected, &chunks[1])
+            Tabs::default()
+                .block(Block::default().borders(Borders::ALL).title("Welcome to marcos"))
+                .style(Style::default().fg(Color::Cyan))
+                .highlight_style(Style::default().fg(Color::Yellow))
+                .select(app.selected_tab)
+                .titles(&app.tabs.iter().map(|e| e.title).collect::<Vec<_>>())
+                .render(t, &chunks[0]);
+            draw_tab(&mut t, &app.tabs[app.selected_tab], app.selected, &chunks[1]);
         });
     t.draw().unwrap();
 }
