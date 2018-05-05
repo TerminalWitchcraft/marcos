@@ -44,4 +44,15 @@ impl<'b> MyTab <'b> {
     pub fn get_preview_items(&self) -> Vec<String> {
         self.current.get_entries()
     }
+
+    pub fn get_parent_index(&self) -> usize {
+        let pwd = &self.parent.get_name();
+        let mut i: usize = 0;
+        for (index, name) in self.get_parent_items().iter().enumerate() {
+            if pwd == name {
+                i = index
+            } 
+        }
+        i
+    }
 }

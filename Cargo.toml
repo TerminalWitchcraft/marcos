@@ -6,3 +6,5 @@ authors = ["Hitesh Paul <hiteshpaul94@gmail.com>"]
 [dependencies]
 tui = "0.2.1"
 termion = "1.5.1"
+log = "0.4"
+fern = "0.5"

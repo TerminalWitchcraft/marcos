@@ -8,14 +8,16 @@ use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
 
-pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, area: &Rect) {
+fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, area: &Rect) {
     Group::default()
         .direction(Direction::Horizontal)
         .sizes(&[Size::Percent(20), Size::Percent(40), Size::Percent(40)])
         .render(t, area, |t, chunks| {
             //Parent View
             SelectableList::default()
-            .block(Block::default().title("Previous").borders(Borders::ALL))
+            .block(Block::default().title(&tab.get_parent_index().to_string()).borders(Borders::ALL))
+            .highlight_style(Style::default().fg(Color::Black).bg(Color::White))
+            .select(tab.get_parent_index())
             .items(&tab.get_parent_items())
             .render(t, &chunks[0]);
 

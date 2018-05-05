@@ -47,4 +47,14 @@ impl MyView {
         }).collect::<Vec<_>>()
     }
 
+    pub fn get_name(&self) -> String {
+        match self.path_buf.file_name() {
+            Some(value)     => match value.to_str() {
+                Some(val)   => val.to_string(),
+                None        => "".to_string(),
+            },
+            None            => "".to_string(),
+        }
+    }
+
 }
