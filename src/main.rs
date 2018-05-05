@@ -11,10 +11,14 @@ use marcos::ui::draw::draw;
 use marcos::ui::tab::MyTab;
 use marcos::events::input::InputThread;
 use marcos::core::app::App;
+use marcos::core::log;
 
 
 
 fn main() {
+    //Set up logging
+    log::setup_logger().unwrap();
+
     let backend = MouseBackend::new().unwrap();
     let mut terminal = Terminal::new(backend).unwrap();
 

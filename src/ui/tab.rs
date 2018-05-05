@@ -25,6 +25,9 @@ impl<'b> MyTab <'b> {
         let current_path = env::current_dir().unwrap();
         let parent_path = current_path.parent().unwrap().to_path_buf();
         let preview_path = current_path.parent().unwrap().to_path_buf();
+        debug!("Setting current directory to... {:?}", &current_path);
+        debug!("Setting parent directory to... {:?}", &parent_path);
+        debug!("Setting preview directory to... {:?}", &preview_path);
         MyTab {
             title: "Default Void",
             parent: MyView::from(parent_path),
@@ -46,7 +49,7 @@ impl<'b> MyTab <'b> {
     }
 
     pub fn get_parent_index(&self) -> usize {
-        let pwd = &self.parent.get_name();
+        let pwd = &self.current.get_name();
         let mut i: usize = 0;
         for (index, name) in self.get_parent_items().iter().enumerate() {
             if pwd == name {

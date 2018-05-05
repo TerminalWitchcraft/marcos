@@ -48,6 +48,7 @@ impl MyView {
     }
 
     pub fn get_name(&self) -> String {
+        //info!("Parent {:?}", self.path_buf.file_name());
         match self.path_buf.file_name() {
             Some(value)     => match value.to_str() {
                 Some(val)   => val.to_string(),
