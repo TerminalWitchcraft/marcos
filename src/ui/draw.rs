@@ -16,15 +16,7 @@ pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, are
             //Parent View
             SelectableList::default()
             .block(Block::default().title("Previous").borders(Borders::ALL))
-            .items(&tab.parent.iter().map(|e| {
-                match e.file_name() {
-                    Some(data)  => match data.to_str() {
-                        Some(value) => value,
-                        None        => "",
-                    },
-                    None        => "",
-                }
-            }).collect::<Vec<_>>())
+            .items(&tab.get_parent_items())
             .render(t, &chunks[0]);
 
             //Current View
@@ -32,29 +24,13 @@ pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, are
             .highlight_style(Style::default().fg(Color::Black).bg(Color::White))
             .block(Block::default().title("Current").borders(Borders::ALL))
             .select(selected)
-            .items(&tab.current.iter().map(|e| {
-                match e.file_name() {
-                    Some(data)  => match data.to_str() {
-                        Some(value)     => value,
-                        None            => "",
-                    },
-                    None        => "",
-                }
-            }).collect::<Vec<_>>())
+            .items(&tab.get_current_items())
             .render(t, &chunks[1]);
 
             //Preview View
             SelectableList::default()
             .block(Block::default().title("Preview").borders(Borders::ALL))
-            .items(&tab.current.iter().map(|e| {
-                match e.file_name() {
-                    Some(data)  => match data.to_str() {
-                        Some(value)     => value,
-                        None            => "",
-                    },
-                    None        => "",
-                }
-            }).collect::<Vec<_>>())
+            .items(&tab.get_preview_items())
             .render(t, &chunks[2]);
         });
 } // for fn tab_draw

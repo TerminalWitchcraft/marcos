@@ -53,22 +53,22 @@ fn main() {
                 event::Key::Up => if app.selected > 0 {
                     app.selected -= 1;
                 } else {
-                    app.selected = app.tabs[app.selected_tab].current.len() - 1;
+                    app.selected = app.tabs[app.selected_tab].current.count - 1;
                 },
                 event::Key::Char('k') => if app.selected > 0 {
                     app.selected -= 1;
                 } else {
-                    app.selected = app.tabs[app.selected_tab].current.len() - 1;
+                    app.selected = app.tabs[app.selected_tab].current.count - 1;
                 },
                 event::Key::Down => {
                     app.selected += 1;
-                    if app.selected > app.tabs[app.selected_tab].current.len() - 1 {
+                    if app.selected > app.tabs[app.selected_tab].current.count - 1 {
                         app.selected = 0;
                     }
                 },
                 event::Key::Char('j') => {
                     app.selected += 1;
-                    if app.selected > app.tabs[app.selected_tab].current.len() - 1 {
+                    if app.selected > app.tabs[app.selected_tab].current.count - 1 {
                         app.selected = 0;
                     }
                 },

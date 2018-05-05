@@ -1,12 +1,12 @@
-use std::path::PathBuf;
-use std::fs::read_dir;
+use std::env;
+use ui::view::MyView;
 
 
 pub struct MyTab<'b> {
     pub title: &'b str,
-    pub parent: Vec<PathBuf>,
-    pub current: Vec<PathBuf>,
-    pub preview: Vec<PathBuf>,
+    pub parent: MyView,
+    pub current: MyView,
+    pub preview: MyView,
 }
 
 
@@ -14,35 +14,34 @@ impl<'b> MyTab <'b> {
     pub fn new(name:&str) -> MyTab {
         MyTab {
             title: name,
-            parent: Vec::new(),
-            current: Vec::new(),
-            preview: Vec::new(),
+            parent: MyView::new(),
+            current: MyView::new(),
+            preview: MyView::new(),
         }
     }
 
     pub fn default() -> MyTab <'b> {
         // current directory
-        let current_paths = read_dir(".").unwrap();
-        let current_list = current_paths.into_iter().map(|e| {
-            let dir = e.unwrap();
-            let p = dir.path();
-            p
-        }).collect::<Vec<_>>();
-
-        //parent directory
-        let parent_paths = read_dir("..").unwrap();
-        let parent_list = parent_paths.into_iter().map(|e| {
-            let dir = e.unwrap();
-            let p = dir.path();
-            p
-        }).collect::<Vec<_>>();
-
-        //Populate the MyTab instance
+        let current_path = env::current_dir().unwrap();
+        let parent_path = current_path.parent().unwrap().to_path_buf();
+        let preview_path = current_path.parent().unwrap().to_path_buf();
         MyTab {
             title: "Default Void",
-            parent: parent_list,
-            current: current_list,
-            preview: Vec::new(),
+            parent: MyView::from(parent_path),
+            current: MyView::from(current_path),
+            preview: MyView::from(preview_path),
         }
+    }
+
+    pub fn get_current_items(&self) -> Vec<String> {
+        self.current.get_entries()
+    }
+
+    pub fn get_parent_items(&self) -> Vec<String> {
+        self.parent.get_entries()
+    }
+
+    pub fn get_preview_items(&self) -> Vec<String> {
+        self.current.get_entries()
     }
 }
