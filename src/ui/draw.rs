@@ -17,8 +17,11 @@ pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, are
             SelectableList::default()
             .block(Block::default().title("Previous").borders(Borders::ALL))
             .items(&tab.parent.iter().map(|e| {
-                match e.to_str() {
-                    Some(data)  => data,
+                match e.file_name() {
+                    Some(data)  => match data.to_str() {
+                        Some(value) => value,
+                        None        => "",
+                    },
                     None        => "",
                 }
             }).collect::<Vec<_>>())
@@ -30,8 +33,11 @@ pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, are
             .block(Block::default().title("Current").borders(Borders::ALL))
             .select(selected)
             .items(&tab.current.iter().map(|e| {
-                match e.to_str() {
-                    Some(data)  => data,
+                match e.file_name() {
+                    Some(data)  => match data.to_str() {
+                        Some(value)     => value,
+                        None            => "",
+                    },
                     None        => "",
                 }
             }).collect::<Vec<_>>())
@@ -41,8 +47,11 @@ pub fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, are
             SelectableList::default()
             .block(Block::default().title("Preview").borders(Borders::ALL))
             .items(&tab.current.iter().map(|e| {
-                match e.to_str() {
-                    Some(data)  => data,
+                match e.file_name() {
+                    Some(data)  => match data.to_str() {
+                        Some(value)     => value,
+                        None            => "",
+                    },
                     None        => "",
                 }
             }).collect::<Vec<_>>())
