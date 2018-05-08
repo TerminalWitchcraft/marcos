@@ -77,6 +77,35 @@ fn main() {
                         app.selected = 0;
                     }
                 },
+                event::Key::Char(':') => {
+                    // Shows the command box
+                    app.show_command_box = true;
+                    // loop through keys until they press enter or esc
+                    terminal.show_cursor().unwrap();
+                    loop {
+                        let in_evt = input_thread.get_evt().unwrap();
+                        match in_evt {
+                            event::Key::Esc     => {
+                                terminal.hide_cursor().unwrap();
+                                app.show_command_box = false;
+                                break;
+                            },
+                            event::Key::Backspace => {
+                                app.command.pop();
+                            },
+                            event::Key::Char('\n') => {
+                                app.run_command();
+                                terminal.hide_cursor().unwrap();
+                                app.show_command_box = false;
+                                break;
+                            },
+                            event::Key::Char(c)  => {
+                                app.command.push(c)
+                            },
+                            _   => {},
+                        }
+                    }
+                }
                 _ => {}
 
         }
