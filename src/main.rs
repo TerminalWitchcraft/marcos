@@ -96,6 +96,8 @@ fn main() {
                             event::Key::Char('\n') => {
                                 app.run_command();
                                 terminal.hide_cursor().unwrap();
+                                terminal.clear().unwrap();
+                                draw(&mut terminal, &mut app);
                                 app.show_command_box = false;
                                 break;
                             },

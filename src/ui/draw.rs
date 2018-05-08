@@ -3,7 +3,7 @@ use core::app::App;
 
 use tui::Terminal;
 use tui::backend::MouseBackend;
-use tui::widgets::{Block, Borders, Widget, SelectableList, Tabs};
+use tui::widgets::{Block, Borders, Widget, SelectableList, Tabs, Paragraph};
 use tui::layout::{Direction, Group, Rect, Size};
 use tui::style::{Color, Style};
 
@@ -38,18 +38,39 @@ fn draw_tab(t: &mut Terminal<MouseBackend>, tab: &MyTab, selected:usize, area: &
 } // for fn tab_draw
 
 pub fn draw(t: &mut Terminal<MouseBackend>, app: &mut App) {
-    Group::default()
-        .direction(Direction::Vertical)
-        .sizes(&[Size::Fixed(3), Size::Min(0)])
-        .render(t, &app.size, |mut t, chunks|{
-            Tabs::default()
-                .block(Block::default().borders(Borders::ALL).title("Welcome to marcos"))
-                .style(Style::default().fg(Color::Cyan))
-                .highlight_style(Style::default().fg(Color::Yellow))
-                .select(app.selected_tab)
-                .titles(&app.tabs.iter().map(|e| e.title).collect::<Vec<_>>())
-                .render(t, &chunks[0]);
-            draw_tab(&mut t, &app.tabs[app.selected_tab], app.selected, &chunks[1]);
-        });
+    if app.show_command_box == false {
+        Group::default()
+            .direction(Direction::Vertical)
+            .sizes(&[Size::Fixed(3), Size::Min(0)])
+            .render(t, &app.size, |mut t, chunks|{
+                Tabs::default()
+                    .block(Block::default().borders(Borders::ALL).title("Welcome to marcos"))
+                    .style(Style::default().fg(Color::Cyan))
+                    .highlight_style(Style::default().fg(Color::Yellow))
+                    .select(app.selected_tab)
+                    .titles(&app.tabs.iter().map(|e| e.title).collect::<Vec<_>>())
+                    .render(t, &chunks[0]);
+                draw_tab(&mut t, &app.tabs[app.selected_tab], app.selected, &chunks[1]);
+            });
+    } else {
+        Group::default()
+            .direction(Direction::Vertical)
+            .sizes(&[Size::Percent(20), Size::Percent(40), Size::Percent(40)])
+            .render(t, &app.size, |mut t, chunks|{
+                Tabs::default()
+                    .block(Block::default().borders(Borders::ALL).title("Welcome to marcos"))
+                    .style(Style::default().fg(Color::Cyan))
+                    .highlight_style(Style::default().fg(Color::Yellow))
+                    .select(app.selected_tab)
+                    .titles(&app.tabs.iter().map(|e| e.title).collect::<Vec<_>>())
+                    .render(t, &chunks[0]);
+                draw_tab(&mut t, &app.tabs[app.selected_tab], app.selected, &chunks[1]);
+                Paragraph::default()
+                    .style(Style::default().fg(Color::Yellow))
+                    .block(Block::default().borders(Borders::ALL))
+                    .text("COmmadn here")
+                    .render(t, &chunks[2])
+            });
+    }
     t.draw().unwrap();
 }
