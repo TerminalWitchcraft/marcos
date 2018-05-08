@@ -1,23 +1,23 @@
 extern crate marcos;
 extern crate tui;
 extern crate termion;
+#[macro_use]extern crate log;
 
 
 use termion::event;
-
 use tui::Terminal;
 use tui::backend::MouseBackend;
 use marcos::ui::draw::draw;
 use marcos::ui::tab::MyTab;
 use marcos::events::input::InputThread;
 use marcos::core::app::App;
-use marcos::core::log;
+use marcos::core;
 
 
 
 fn main() {
     //Set up logging
-    log::setup_logger().unwrap();
+    core::log::setup_logger().unwrap();
 
     let backend = MouseBackend::new().unwrap();
     let mut terminal = Terminal::new(backend).unwrap();
@@ -43,6 +43,7 @@ fn main() {
     loop {
         let size = terminal.size().unwrap();
         if size != app.size {
+            info!("Change in terminal size");
             terminal.resize(size).unwrap();
             app.size = size;
         }
