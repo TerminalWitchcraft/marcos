@@ -61,10 +61,15 @@ fn load_contents(app: &mut Cursive, entry: &DirEntry) {
 
 
 fn main() {
+
+    let default_tab = MyTab::default();
+    let mut file_view = SelectView::default();
+    for item in default_tab.current.get_entries().iter() {
+        file_view.add_item(item.to_string(), 1);
+    }
     let mut siv = Cursive::default();
     let mut panes = LinearLayout::horizontal();
-    let picker = file_picker(".");
-    panes.add_child(picker);
+    panes.add_child(file_view);
     panes.add_child(DummyView);
     panes.add_child(TextView::new("Contents"));
 
