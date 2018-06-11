@@ -5,20 +5,21 @@ extern crate termion;
 #[macro_use]extern crate log;
 
 
-use termion::event;
-use tui::Terminal;
-use tui::backend::MouseBackend;
-use marcos::ui::draw::draw;
+// use termion::event;
+// use tui::Terminal;
+// use tui::backend::MouseBackend;
+// use marcos::ui::draw::draw;
 use marcos::ui::tab::MyTab;
-use marcos::events::input::InputThread;
-use marcos::core::app::App;
-use marcos::core;
+// use marcos::events::input::InputThread;
+// use marcos::core::app::App;
+// use marcos::core;
 
 use cursive::Cursive;
+use cursive::traits::Boxable;
 use cursive::theme::{Color, PaletteColor, Theme};
 use cursive::views::{Dialog, TextView, SelectView};
-use cursive::view::{Position, Offset};
 use cursive::views::{LinearLayout, DummyView};
+use cursive::align;
 use std::fs::{self, DirEntry, File};
 use std::io::Read;
 use std::path::Path;
@@ -67,17 +68,21 @@ fn main() {
     for item in default_tab.current.get_entries().iter() {
         file_view.add_item(item.to_string(), 1);
     }
+    // file_view.align(align::Align::new(align::HAlign.get_offset(5,5),
+    // align::VAlign.get_offset(5,5)));
     let mut siv = Cursive::default();
     let mut panes = LinearLayout::horizontal();
-    panes.add_child(file_view);
+    panes.add_child(file_view.full_width().full_height());
     panes.add_child(DummyView);
     panes.add_child(TextView::new("Contents"));
 
-    let mut layout = LinearLayout::vertical();
-    layout.add_child(panes);
-    layout.add_child(DummyView);
-    layout.add_child(TextView::new("Status"));
-    siv.add_layer(Dialog::around(layout).button("Quit", |a| a.quit()));
+    // let mut layout = LinearLayout::vertical();
+    // layout.add_child(panes);
+    // layout.add_child(DummyView);
+    // layout.add_child(TextView::new("Status"));
+    siv.add_layer(Dialog::around(panes).padding((0,0,0,0))); //.button("Quit", |a| a.quit()));
+    siv.add_global_callback('q', |s| s.quit());
+    siv.load_theme_file("assets/style.toml").unwrap();
     siv.run();
     // //Set up logging
     // core::log::setup_logger().unwrap();
