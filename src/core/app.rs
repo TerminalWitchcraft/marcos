@@ -1,8 +1,14 @@
 //! Module contains functions related to core functionalities of the app.
-use cursive::{self, Cursive};
-use termion;
+
+use std::env;
+use std::path::PathBuf;
+
+use cursive::{Cursive};
+use cursive::views::{Dialog, SelectView, LinearLayout, TextView};
+use cursive::traits::{Identifiable, Boxable};
 
 use utils::logger;
+use ui::tab::Tab;
 
 
 /// Create a new instance of marcos with the specified backend.
@@ -10,7 +16,9 @@ use utils::logger;
 /// It also setups the logger for log events
 pub fn init() -> App {
     logger::init().unwrap();
-    App::new()
+    let mut app = App::new();
+    app.add_tab(String::from("1"), env::current_dir().unwrap());
+    app
 }
 
 /// The data structure holding various elements related to `App`.
@@ -43,6 +51,22 @@ impl App {
         }
     }
 
+    pub fn add_tab(&mut self, name: String, path: PathBuf) {
+        let tab = Tab::from(name, &path);
+        let mut parent_view: SelectView = SelectView::default();
+        let mut current_view: SelectView = SelectView::default();
+
+        let mut panes = LinearLayout::horizontal();
+        panes.add_child(parent_view.with_id("parent").max_width(70).min_width(40).full_height());
+        panes.add_child(current_view.with_id("current").max_width(70).min_width(40).full_height());
+        panes.add_child(TextView::new("Contents").with_id("contents").full_width());
+        self.siv.add_layer(Dialog::around(panes).padding((0,0,0,0)));
+    }
+
+    #[allow(dead_code)]
+    fn add_layout(&mut self) {
+        // something
+    }
 
     /// Funtion to handle the event loop.
     ///

@@ -7,3 +7,4 @@ extern crate termion;
 
 pub mod core;
 pub mod utils;
+pub mod ui;
