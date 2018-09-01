@@ -5,7 +5,7 @@ use std::error::Error;
 use std::path::PathBuf;
 
 use cursive::{Cursive};
-use cursive::views::{Dialog, SelectView, LinearLayout, TextView};
+use cursive::views::{Dialog, SelectView, LinearLayout, TextView, OnEventView};
 use cursive::traits::{Identifiable, Boxable};
 
 use utils::logger;
@@ -54,24 +54,24 @@ impl App {
     }
 
     pub fn add_tab(&mut self, name: &str, path: PathBuf) {
-        let tab = Tab::from(name, &path);
+        let mut tab = Tab::from(name, &path);
 
-        let parent_view: SelectView<PathBuf> = tab.p_widget();
-        let current_view: SelectView<PathBuf> = tab.c_widget();
 
         let mut panes = LinearLayout::horizontal();
-        panes.add_child(parent_view.with_id(format!("{tab}/parent", tab=name))
+        panes.add_child(tab.p_widget
                         .max_width(70)
                         .min_width(40)
                         .full_height());
-        panes.add_child(current_view.with_id(format!("{tab}/current", tab=name))
+        panes.add_child(tab.c_widget
                         .max_width(70)
                         .min_width(40)
                         .full_height());
-        panes.add_child(TextView::new("Contents")
-                        .with_id(format!("{tab}/contents", tab=name))
+        panes.add_child(tab.preview_widget
                         .full_width());
         self.siv.add_layer(Dialog::around(panes).padding((0,0,0,0)));
+        // self.siv.add_global_callback('h', move |s| {
+        //     tab.go_back();
+        // };
     }
 
     #[allow(dead_code)]
