@@ -1,12 +1,12 @@
 extern crate marcos;
 extern crate cursive;
 extern crate termion;
-#[macro_use]extern crate log;
 
-use marcos::{core, utils};
+use marcos::{core};
 
 fn main() {
-    println!("Hello world;");
+    let mut app = core::app::init().unwrap();
+    app.run();
 }
 
 

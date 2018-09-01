@@ -16,7 +16,7 @@ pub fn init() -> Result<(), fern::InitError> {
             ))
         })
         .level(log::LevelFilter::Debug)
-        .chain(fern::log_file("./log/output.log")?)
+        .chain(fern::log_file("log/output.log")?)
         .apply()?;
     Ok(())
 }
