@@ -94,15 +94,16 @@ impl App {
 
         let mut panes = LinearLayout::horizontal();
         panes.add_child(Panel::new(p_widget.with_id(format!("{}/parent", name))
-                        .max_width(70)
-                        .min_width(40)
+                        .full_width()
+                        .max_width(30)
                         .full_height()));
         panes.add_child(Panel::new(c_widget.with_id(format!("{}/current", name))
-                        .max_width(70)
-                        .min_width(40)
+                        .full_width()
+                        .max_width(40)
                         .full_height()));
         panes.add_child(Panel::new(preview_widget.with_id(format!("{}/preview", name))
-                        .full_width()));
+                        .full_width()
+                        .full_height()));
         let mut h_panes = LinearLayout::vertical();
         h_panes.add_child(TextView::new("Tabs").with_id("global/tabs"));
         h_panes.add_child(panes);
