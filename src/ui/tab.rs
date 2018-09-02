@@ -4,10 +4,10 @@ use cursive::traits::Identifiable;
 use cursive::event::EventResult;
 
 #[allow(dead_code)]
-struct View {
+pub struct View {
     p_buff: PathBuf,
     count: usize,
-    vec_entries: Vec<PathBuf>,
+    pub vec_entries: Vec<PathBuf>,
 }
 
 impl View {
@@ -32,14 +32,9 @@ pub struct Tab {
     pub title: String,
     
     // Views
-    p_view: View,
-    c_view: View,
-    preview: View,
-
-    // Widgets
-    pub p_widget: IdView<SelectView<PathBuf>>,
-    pub c_widget: IdView<OnEventView<SelectView<PathBuf>>>,
-    pub preview_widget: IdView<TextView>,
+    pub p_view: View,
+    pub c_view: View,
+    pub preview: View,
 
     // Focused 
     p_focused: usize,
@@ -65,30 +60,11 @@ impl Tab {
         let preview = View::from(&preview_path);
         let p_focused = Self::get_parent_index(&c_view);
 
-        let mut p_widget = Self::get_widget(&p_view);
-        p_widget.set_enabled(false);
-
-        let c_widget = Self::get_widget(&c_view);
-        let c_widget = OnEventView::new(c_widget)
-            .on_pre_event_inner('k', |s| {
-                s.select_up(1);
-                Some(EventResult::Consumed(None))
-            })
-            .on_pre_event_inner('j', |s| {
-                s.select_down(1);
-                Some(EventResult::Consumed(None))
-            });
-
         Self {
             title: String::from(title),
             p_view,
             c_view,
             preview,
-
-            p_widget: p_widget.with_id(format!("{}/parent", title)),
-            c_widget: c_widget.with_id(format!("{}/current", title)),
-            preview_widget: TextView::new("Contents")
-                .with_id(format!("{}/preview", title)),
 
             p_focused,
             c_focused: 0,
@@ -98,21 +74,6 @@ impl Tab {
             c_selected: Vec::new(),
             preview_selected: Vec::new(),
         }
-    }
-
-    fn get_widget(view: &View) -> SelectView<PathBuf> {
-        let mut widget = SelectView::default();
-        for item in view.vec_entries.iter() {
-            let label: &str = match item.file_name() {
-                Some(name) => match name.to_str() {
-                    Some(data) => data,
-                    None    => "",
-                }
-                None => ""
-            };
-        widget.add_item(label, PathBuf::from(item));
-        }
-        widget
     }
 
     pub fn go_back(&mut self) {
