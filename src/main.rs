@@ -36,6 +36,7 @@ fn main() {
         },
         matches.value_of("log"),
         matches.value_of("log_level")).unwrap();
+    app.run();
     // if let Some(c) = matches.value_of("path") {
     //     let mut app = core::app::init(c).unwrap();
     //     // println!("Got {} for path", c);

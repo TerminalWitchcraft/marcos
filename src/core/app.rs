@@ -1,10 +1,11 @@
 //! Module contains functions related to core functionalities of the app.
 
 use std::env;
+use std::fs;
 use std::process;
 use std::io::{Write,stdout};
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use std::collections::HashMap;
 
 use cursive::{Cursive};
@@ -29,7 +30,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         "../" | ".." => env::current_dir()?.parent().unwrap().to_path_buf(),
         x => PathBuf::from(x),
     };
-    println!("{:?}", path);
+    info!("Initializing with path {:?}", path);
     if !path.is_dir() {
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
@@ -58,6 +59,20 @@ impl App {
     ///
     /// TODO `:` is used to open the command box
     pub fn new() -> Self {
+        let data_path: PathBuf = env::var("XDG_CONFIG_HOME")
+            .map(|p| PathBuf::from(p).join("marcos"))
+            .unwrap_or_else(|_| {
+                let home = env::home_dir().expect("No Home directory");
+                home.join(".config").join("marcos")
+            });
+        if !data_path.exists() {
+            fs::create_dir_all(&data_path)
+                .expect("Cannot create data_dir");
+        }
+        let asset_file = data_path.join("style.toml");
+        if !asset_file.is_file() {
+            fs::File::create(&asset_file).expect("Failed to create asset file");
+        }
         let mut siv = Cursive::default();
         let mut stdout = stdout().into_raw_mode().unwrap();
         write!(stdout,"{}{}",
@@ -70,7 +85,7 @@ impl App {
         siv.add_global_callback('q', |s| s.quit());
 
         debug!("Loading theme resource file");
-        siv.load_theme_file("assets/style.toml").expect("Cannot find file!");
+        siv.load_theme_file(asset_file).expect("Cannot find file!");
         Self {
             siv,
             vec_tabs: HashMap::new(),
@@ -130,6 +145,7 @@ impl App {
         h_panes.add_child(status_bar);
         h_panes.add_child(command_view.with_id("global/command"));
         self.siv.add_layer(h_panes);
+        self.siv.add_global_callback('q', |s| s.quit());
         //self.siv.add_layer(Dialog::around(panes).padding((0,0,0,0)));
         // self.siv.add_global_callback('h', move |s| {
         //     tab.go_back();
