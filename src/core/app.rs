@@ -1,9 +1,10 @@
 //! Module contains functions related to core functionalities of the app.
 
 use std::env;
+use std::process;
 use std::io::{Write,stdout};
 use std::error::Error;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 
 use cursive::{Cursive};
@@ -21,10 +22,20 @@ use ui::tab::{Tab, View};
 /// Create a new instance of marcos with the specified backend.
 ///
 /// It also setups the logger for log events
-pub fn init() -> Result<App, Box<Error>> {
-    logger::init()?;
+pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Result<App, Box<Error>> {
+    logger::init(log_file, log_level)?;
+    let path = match path {
+        "." | "./" => env::current_dir()?,
+        "../" | ".." => env::current_dir()?.parent().unwrap().to_path_buf(),
+        x => PathBuf::from(x),
+    };
+    println!("{:?}", path);
+    if !path.is_dir() {
+        println!("Incorrect path or unaccessible directory! Please cheack PATH");
+        process::exit(1);
+    }
     let mut app = App::new();
-    app.add_tab("1", env::current_dir()?);
+    app.add_tab("1", path);
     Ok(app)
 }
 
