@@ -75,12 +75,12 @@ impl App {
         }
         let mut siv = Cursive::default();
         let mut stdout = stdout().into_raw_mode().unwrap();
-        write!(stdout,"{}{}",
-                // Clear the screen.
-                termion::clear::All,
-                // Hide the cursor.
-                termion::cursor::Hide
-            ).unwrap();
+        //write!(stdout,"{}{}",
+        //        // Clear the screen.
+        //        termion::clear::All,
+        //        // Hide the cursor.
+        //        termion::cursor::Hide
+        //    ).unwrap();
         // Add 'q' to global callback
         siv.add_global_callback('q', |s| s.quit());
 

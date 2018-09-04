@@ -11,5 +11,16 @@ clap = "2"
 
 [dependencies.cursive]
 version = "0.9"
-default-features = false
-features = ["termion-backend"]
+default-features = true
+# features = ["termion-backend"]
+
+
+# Some crates to consider
+# fsort
+# tokio-fs
+# sys-info
+# walkdir
+# fs_extra
+# fs_swap
+# alphanumeric-sort
+# path_abs
