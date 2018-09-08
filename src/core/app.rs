@@ -10,10 +10,10 @@ use std::collections::HashMap;
 
 use cursive::{Cursive};
 use cursive::views::*;
-use cursive::traits::{Identifiable, Boxable};
-use cursive::event::EventResult;
+use cursive::view::ScrollStrategy;
+use cursive::traits::{Identifiable, Boxable, Scrollable};
+use cursive::event::{Event,EventResult};
 
-use termion;
 use termion::raw::IntoRawMode;
 
 use utils::logger;
@@ -32,6 +32,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
     };
     info!("Initializing with path {:?}", path);
     if !path.is_dir() {
+        debug!("Failure with directory {:?}", path);
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
     }
@@ -50,7 +51,7 @@ pub struct App {
     /// The index of focused tab starting from 0.
     focused_tab: usize,
     /// The index of focused entry starting from 0.
-    focused_entry: usize,
+    focused_entry: String,
 }
 
 impl App {
@@ -74,7 +75,7 @@ impl App {
             fs::File::create(&asset_file).expect("Failed to create asset file");
         }
         let mut siv = Cursive::default();
-        let mut stdout = stdout().into_raw_mode().unwrap();
+        // let mut stdout = stdout().into_raw_mode().unwrap();
         //write!(stdout,"{}{}",
         //        // Clear the screen.
         //        termion::clear::All,
@@ -82,14 +83,14 @@ impl App {
         //        termion::cursor::Hide
         //    ).unwrap();
         // Add 'q' to global callback
-        siv.add_global_callback('q', |s| s.quit());
+        siv.add_global_callback(Event::CtrlChar('w'), |s| s.quit());
 
         debug!("Loading theme resource file");
         siv.load_theme_file(asset_file).expect("Cannot find file!");
         Self {
             siv,
             vec_tabs: HashMap::new(),
-            focused_entry: 0,
+            focused_entry: String::new(),
             focused_tab: 0,
         }
     }
@@ -97,7 +98,7 @@ impl App {
     pub fn add_tab(&mut self, name: &str, path: PathBuf) {
         let tab = Tab::from(name, &path);
         self.vec_tabs.insert(name.to_string(), tab);
-        self.focused_entry += 1;
+        self.focused_entry = name.to_string();
 
         let current_tab: &Tab = match self.vec_tabs.get(name) {
             Some(x)     => x,
@@ -105,6 +106,9 @@ impl App {
         };
         let mut p_widget = Self::get_widget(&current_tab.p_view);
         p_widget.set_enabled(false);
+        let index = current_tab.get_parent_index();
+        debug!("Setting parent focus to id: {}", index);
+        p_widget.set_selection(index);
 
         let c_widget = Self::get_widget(&current_tab.c_view);
         let c_widget = OnEventView::new(c_widget)
@@ -123,7 +127,7 @@ impl App {
                         .full_width()
                         .max_width(30)
                         .full_height()));
-        panes.add_child(Panel::new(c_widget.with_id(format!("{}/current", name))
+        panes.add_child(Panel::new(c_widget.with_id(format!("{}/current", name)).scrollable()
                         .full_width()
                         .max_width(40)
                         .full_height()));
@@ -144,6 +148,7 @@ impl App {
         command_view.hide();
         h_panes.add_child(status_bar);
         h_panes.add_child(command_view.with_id("global/command"));
+        self.siv.focus_id(&format!("{}/current", self.focused_entry));
         self.siv.add_layer(h_panes);
         self.siv.add_global_callback('q', |s| s.quit());
         //self.siv.add_layer(Dialog::around(panes).padding((0,0,0,0)));

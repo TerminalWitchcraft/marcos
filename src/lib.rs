@@ -3,6 +3,7 @@
 extern crate cursive;
 extern crate fern;
 extern crate termion;
+extern crate fsort;
 
 
 pub mod core;

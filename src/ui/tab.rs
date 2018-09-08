@@ -4,6 +4,7 @@ use cursive::traits::Identifiable;
 use cursive::event::EventResult;
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct View {
     p_buff: PathBuf,
     count: usize,
@@ -28,6 +29,7 @@ impl View {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Tab {
     pub title: String,
     
@@ -35,11 +37,6 @@ pub struct Tab {
     pub p_view: View,
     pub c_view: View,
     pub preview: View,
-
-    // Focused 
-    p_focused: usize,
-    c_focused: usize,
-    preview_focused: usize,
 
     // Selected
     p_selected: Vec<usize>,
@@ -58,17 +55,12 @@ impl Tab {
         let p_view = View::from(&parent_path);
         let c_view = View::from(current_path);
         let preview = View::from(&preview_path);
-        let p_focused = Self::get_parent_index(&c_view);
 
         Self {
             title: String::from(title),
             p_view,
             c_view,
             preview,
-
-            p_focused,
-            c_focused: 0,
-            preview_focused: 0,
 
             p_selected: Vec::new(),
             c_selected: Vec::new(),
@@ -80,10 +72,10 @@ impl Tab {
         println!("hello");
     }
 
-    fn get_parent_index(c_view: &View) -> usize {
+    pub fn get_parent_index(&self) -> usize {
         let mut i: usize = 0;
-        for (index, name) in c_view.vec_entries.iter().enumerate() {
-            if &c_view.p_buff == name {
+        for (index, name) in self.p_view.vec_entries.iter().enumerate() {
+            if &self.c_view.p_buff == name {
                 i = index;
                 break;
             }

@@ -8,6 +8,7 @@ termion = "*"
 log = "0.4"
 fern = "0.5"
 clap = "2"
+fsort = "1"
 
 [dependencies.cursive]
 version = "0.9"
