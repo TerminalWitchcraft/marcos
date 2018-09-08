@@ -15,6 +15,7 @@ pub fn init(file_name: Option<&str>, log_level: Option<&str>) -> Result<(), fern
                 message
             ))
         })
+        .level_for("cursive", log::LevelFilter::Warn)
         .level(match log_level {
             Some(c) => match c {
                 "debug" => log::LevelFilter::Debug,
