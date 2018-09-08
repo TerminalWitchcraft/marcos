@@ -2,8 +2,8 @@
 #[macro_use]extern crate log;
 extern crate cursive;
 extern crate fern;
-extern crate termion;
-extern crate fsort;
+extern crate walkdir;
+extern crate alphanumeric_sort;
 
 
 pub mod core;

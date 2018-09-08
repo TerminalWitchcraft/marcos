@@ -1,29 +1,15 @@
 use std::path::PathBuf;
-use cursive::views::{SelectView, OnEventView, IdView, TextView};
-use cursive::traits::Identifiable;
-use cursive::event::EventResult;
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct View {
-    p_buff: PathBuf,
-    count: usize,
-    pub vec_entries: Vec<PathBuf>,
+    pub p_buff: PathBuf,
 }
 
 impl View {
     fn from(path: &PathBuf) -> Self {
-        let entries = path.read_dir().unwrap();
-        let paths = entries.into_iter().map(|e| {
-            let dir = e.unwrap();
-            let p = dir.path();
-            p
-        }).collect::<Vec<_>>();
-
         Self {
             p_buff: path.to_path_buf(),
-            count: paths.len(),
-            vec_entries: paths
         }
     }
 }
@@ -70,17 +56,6 @@ impl Tab {
 
     pub fn go_back(&mut self) {
         println!("hello");
-    }
-
-    pub fn get_parent_index(&self) -> usize {
-        let mut i: usize = 0;
-        for (index, name) in self.p_view.vec_entries.iter().enumerate() {
-            if &self.c_view.p_buff == name {
-                i = index;
-                break;
-            }
-        }
-        i
     }
 
 }

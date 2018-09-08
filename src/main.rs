@@ -1,9 +1,8 @@
 extern crate marcos;
 extern crate cursive;
-extern crate termion;
 extern crate clap;
 
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App};
 use marcos::{core};
 
 fn main() {

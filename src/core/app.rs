@@ -3,21 +3,22 @@
 use std::env;
 use std::fs;
 use std::process;
-use std::io::{Write,stdout};
 use std::error::Error;
 use std::path::{PathBuf};
 use std::collections::HashMap;
 
 use cursive::{Cursive};
 use cursive::views::*;
-use cursive::view::ScrollStrategy;
 use cursive::traits::{Identifiable, Boxable, Scrollable};
 use cursive::event::{Event,EventResult};
 
-use termion::raw::IntoRawMode;
+use walkdir::WalkDir;
+use alphanumeric_sort::compare_os_str;
+
 
 use utils::logger;
-use ui::tab::{Tab, View};
+use utils::filter;
+use ui::tab::{Tab};
 
 
 /// Create a new instance of marcos with the specified backend.
@@ -37,7 +38,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         process::exit(1);
     }
     let mut app = App::new();
-    app.add_tab("1", path);
+    app.add_tab("1", path)?;
     Ok(app)
 }
 
@@ -95,7 +96,7 @@ impl App {
         }
     }
 
-    pub fn add_tab(&mut self, name: &str, path: PathBuf) {
+    pub fn add_tab(&mut self, name: &str, path: PathBuf) -> Result<(), Box<Error>>{
         let tab = Tab::from(name, &path);
         self.vec_tabs.insert(name.to_string(), tab);
         self.focused_entry = name.to_string();
@@ -104,13 +105,11 @@ impl App {
             Some(x)     => x,
             None        => &self.vec_tabs["1"] // The default tab
         };
-        let mut p_widget = Self::get_widget(&current_tab.p_view);
-        p_widget.set_enabled(false);
-        let index = current_tab.get_parent_index();
-        debug!("Setting parent focus to id: {}", index);
-        p_widget.set_selection(index);
+        debug!("Creating parent and current widgets");
+        let (mut p_widget, mut c_widget) = Self::get_widget(&current_tab);
+        debug!("Got number of items in p_widget: {}", p_widget.len());
+        debug!("Got number of items in c_widget: {}", c_widget.len());
 
-        let c_widget = Self::get_widget(&current_tab.c_view);
         let c_widget = OnEventView::new(c_widget)
             .on_pre_event_inner('k', |s| {
                 s.select_up(1);
@@ -141,36 +140,89 @@ impl App {
         let mut status_bar = HideableView::new(TextView::new("Status")
                                                .with_id("global/status"));
         status_bar.unhide();
-        let mut command_view = HideableView::new(Dialog::new()
-                                                 .content(EditView::new()
-                                                          .on_submit(|siv, data| {}))
-                                                 );
-        command_view.hide();
+        // let mut command_view = HideableView::new(Dialog::new()
+        //                                          .content(EditView::new()
+        //                                                   .on_submit(|siv, data| {}))
+        //                                          );
+        // command_view.hide();
         h_panes.add_child(status_bar);
-        h_panes.add_child(command_view.with_id("global/command"));
-        self.siv.focus_id(&format!("{}/current", self.focused_entry));
+        // h_panes.add_child(command_view.with_id("global/command"));
         self.siv.add_layer(h_panes);
         self.siv.add_global_callback('q', |s| s.quit());
-        //self.siv.add_layer(Dialog::around(panes).padding((0,0,0,0)));
-        // self.siv.add_global_callback('h', move |s| {
-        //     tab.go_back();
-        // };
+        Ok(())
     }
 
-    fn get_widget(view: &View) -> SelectView<PathBuf> {
-        let mut widget = SelectView::default();
-        for item in view.vec_entries.iter() {
-            let label: &str = match item.file_name() {
-                Some(name) => match name.to_str() {
-                    Some(data) => data,
-                    None    => "",
+    fn get_widget(tab: &Tab) -> (SelectView<PathBuf>, SelectView<PathBuf>) {
+        let mut c_widget = SelectView::default();
+        debug!("Start of first loop, c_widget");
+        for entry in WalkDir::new(&tab.c_view.p_buff)
+            .max_depth(1)
+            .min_depth(1)
+            .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+            .into_iter()
+            .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
+                let entry = entry.unwrap();
+                debug!("Adding to c_widget: {:?}", entry);
+                match entry.file_name().to_str() {
+                    Some(c)     => c_widget.add_item(c, PathBuf::from(entry.path())),
+                    None        => {},
+                };
+            }
+        debug!("Start of second loop, c_widget");
+        for entry in WalkDir::new(&tab.c_view.p_buff)
+            .max_depth(1)
+            .min_depth(1)
+            .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+            .into_iter()
+            .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                let entry = entry.unwrap();
+                debug!("Adding to c_widget: {:?}", entry);
+                match entry.file_name().to_str() {
+                    Some(c)     => c_widget.add_item(c, PathBuf::from(entry.path())),
+                    None        => {},
+                };
+            }
+        let mut p_widget = SelectView::default();
+        let mut i: usize = 0;
+        debug!("Start of first loop with index, p_widget");
+        for (index,entry) in WalkDir::new(&tab.p_view.p_buff)
+            .max_depth(1)
+            .min_depth(1)
+            .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+            .into_iter()
+            .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
+                let entry = entry.unwrap();
+                debug!("Adding to p_widget: {:?} ", entry);
+                if entry.path() == &tab.c_view.p_buff {
+                    i = index;
                 }
-                None => ""
-            };
-        widget.add_item(label, PathBuf::from(item));
-        }
-        widget
+                match entry.file_name().to_str() {
+                    Some(c)     => p_widget.add_item(c, PathBuf::from(entry.path())),
+                    None        => {},
+                };
+            }
+        debug!("Start of second loop, p_widget");
+        for entry in WalkDir::new(&tab.p_view.p_buff)
+            .max_depth(1)
+            .min_depth(1)
+            .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+            .into_iter()
+            .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                let entry = entry.unwrap();
+                debug!("Adding to p_widget: {:?} ", entry);
+                match entry.file_name().to_str() {
+                    Some(c)     => p_widget.add_item(c, PathBuf::from(entry.path())),
+                    None        => {},
+                };
+            }
+        debug!("Setting selection of p_widget to id: {}", i);
+        p_widget.set_selection(i);
+        p_widget.set_enabled(false);
+        debug!("Number of items in p_widget: {}", p_widget.len());
+        debug!("Number of items in c_widget: {}", c_widget.len());
+        (p_widget, c_widget)
     }
+
 
     #[allow(dead_code)]
     fn add_layout(&mut self) {
