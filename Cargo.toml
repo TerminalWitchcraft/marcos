@@ -4,11 +4,12 @@ version = "0.1.0"
 authors = ["Hitesh Paul <hiteshpaul94@gmail.com>"]
 
 [dependencies]
-termion = "*"
 log = "0.4"
 fern = "0.5"
 clap = "2"
 fsort = "1"
+walkdir = "2.2.5"
+alphanumeric-sort = "1.0.3"
 
 [dependencies.cursive]
 version = "0.9"
