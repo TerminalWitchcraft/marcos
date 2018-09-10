@@ -15,7 +15,7 @@ use cursive::event::{Event,EventResult};
 use walkdir::WalkDir;
 use alphanumeric_sort::compare_os_str;
 
-use mime_guess::guess_mime_type_opt;
+use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
 use utils::logger;
@@ -244,7 +244,8 @@ impl App {
 
 
 fn change_content(siv: &mut Cursive, entry: &PathBuf) {
+    let data: Mime = guess_mime_type(entry);
     siv.call_on_id("preview", |view: &mut TextView| {
-        view.set_content("You pressed h!");
+        view.set_content(format!("{}/{}", data.type_(), data.subtype()));
     });
 }

@@ -10,7 +10,7 @@ clap = "2"
 fsort = "1"
 walkdir = "2.2.5"
 alphanumeric-sort = "1.0.3"
-mime_guess = "1.8.6"
+mime_guess = "2.0.0-alpha.6"
 
 [dependencies.cursive]
 version = "0.9"
