@@ -109,18 +109,18 @@ impl App {
         };
         debug!("Creating parent and current widgets");
         let (p_widget, mut c_widget) = Self::get_widget(&current_tab);
-        c_widget.set_on_submit(change_content);
+        c_widget.set_on_select(change_content);
         debug!("Got number of items in p_widget: {}", p_widget.len());
         debug!("Got number of items in c_widget: {}", c_widget.len());
 
         let c_widget = OnEventView::new(c_widget)
             .on_pre_event_inner('k', |s| {
-                s.select_up(1);
-                Some(EventResult::Consumed(None))
+                let cb = s.select_up(1);
+                Some(EventResult::Consumed(Some(cb)))
             })
             .on_pre_event_inner('j', |s| {
-                s.select_down(1);
-                Some(EventResult::Consumed(None))
+                let cb = s.select_down(1);
+                Some(EventResult::Consumed(Some(cb)))
             });
         let preview_content = current_tab.content_ref.clone();
         let preview_widget = TextView::new_with_content(preview_content);
@@ -244,8 +244,14 @@ impl App {
 
 
 fn change_content(siv: &mut Cursive, entry: &PathBuf) {
-    let data: Mime = guess_mime_type(entry);
     siv.call_on_id("preview", |view: &mut TextView| {
-        view.set_content(format!("{}/{}", data.type_(), data.subtype()));
+        let mut content = String::new();
+        if !entry.is_dir() {
+            let data: Mime = guess_mime_type(entry);
+            content = format!("{}/{}", data.type_(), data.subtype());
+        } else {
+            content = "This is a directory!".to_string();
+        }
+        view.set_content(content);
     });
 }
