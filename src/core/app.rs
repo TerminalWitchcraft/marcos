@@ -15,6 +15,8 @@ use cursive::event::{Event,EventResult};
 use walkdir::WalkDir;
 use alphanumeric_sort::compare_os_str;
 
+use mime_guess::guess_mime_type_opt;
+use mime_guess::Mime;
 
 use utils::logger;
 use utils::filter;
@@ -106,7 +108,8 @@ impl App {
             None        => &self.vec_tabs["1"] // The default tab
         };
         debug!("Creating parent and current widgets");
-        let (mut p_widget, mut c_widget) = Self::get_widget(&current_tab);
+        let (p_widget, mut c_widget) = Self::get_widget(&current_tab);
+        c_widget.set_on_submit(change_content);
         debug!("Got number of items in p_widget: {}", p_widget.len());
         debug!("Got number of items in c_widget: {}", c_widget.len());
 
@@ -119,7 +122,8 @@ impl App {
                 s.select_down(1);
                 Some(EventResult::Consumed(None))
             });
-        let preview_widget = TextView::new("Content");
+        let preview_content = current_tab.content_ref.clone();
+        let preview_widget = TextView::new_with_content(preview_content);
 
         let mut panes = LinearLayout::horizontal();
         panes.add_child(Panel::new(p_widget.with_id(format!("{}/parent", name))
@@ -130,7 +134,7 @@ impl App {
                         .full_width()
                         .max_width(40)
                         .full_height()));
-        panes.add_child(Panel::new(preview_widget.with_id(format!("{}/preview", name))
+        panes.add_child(Panel::new(preview_widget.with_id("preview")
                         .full_width()
                         .full_height()));
         let mut h_panes = LinearLayout::vertical();
@@ -238,3 +242,9 @@ impl App {
 
 }
 
+
+fn change_content(siv: &mut Cursive, entry: &PathBuf) {
+    siv.call_on_id("preview", |view: &mut TextView| {
+        view.set_content("You pressed h!");
+    });
+}

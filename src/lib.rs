@@ -4,7 +4,7 @@ extern crate cursive;
 extern crate fern;
 extern crate walkdir;
 extern crate alphanumeric_sort;
-
+extern crate mime_guess;
 
 pub mod core;
 pub mod utils;

@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use cursive::views::TextContent;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -15,7 +16,7 @@ impl View {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+// #[derive(Debug)]
 pub struct Tab {
     pub title: String,
     
@@ -28,6 +29,7 @@ pub struct Tab {
     p_selected: Vec<usize>,
     c_selected: Vec<usize>,
     preview_selected: Vec<usize>,
+    pub content_ref: TextContent,
 }
 
 
@@ -51,6 +53,7 @@ impl Tab {
             p_selected: Vec::new(),
             c_selected: Vec::new(),
             preview_selected: Vec::new(),
+            content_ref: TextContent::new("Contents"),
         }
     }
 
