@@ -168,7 +168,7 @@ impl App {
                 let entry = entry.unwrap();
                 debug!("Adding to c_widget: {:?}", entry);
                 match entry.file_name().to_str() {
-                    Some(c)     => c_widget.add_item(c, PathBuf::from(entry.path())),
+                    Some(c)     => c_widget.add_item(format!(r"  {}", c), PathBuf::from(entry.path())),
                     None        => {},
                 };
             }
@@ -182,10 +182,11 @@ impl App {
                 let entry = entry.unwrap();
                 debug!("Adding to c_widget: {:?}", entry);
                 match entry.file_name().to_str() {
-                    Some(c)     => c_widget.add_item(c, PathBuf::from(entry.path())),
+                    Some(c)     => c_widget.add_item(format!("  {}", c), PathBuf::from(entry.path())),
                     None        => {},
                 };
             }
+        c_widget.set_selection(0);
         let mut p_widget = SelectView::default();
         let mut i: usize = 0;
         debug!("Start of first loop with index, p_widget");
@@ -201,7 +202,7 @@ impl App {
                     i = index;
                 }
                 match entry.file_name().to_str() {
-                    Some(c)     => p_widget.add_item(c, PathBuf::from(entry.path())),
+                    Some(c)     => p_widget.add_item(format!("  {}", c), PathBuf::from(entry.path())),
                     None        => {},
                 };
             }
@@ -215,7 +216,7 @@ impl App {
                 let entry = entry.unwrap();
                 debug!("Adding to p_widget: {:?} ", entry);
                 match entry.file_name().to_str() {
-                    Some(c)     => p_widget.add_item(c, PathBuf::from(entry.path())),
+                    Some(c)     => p_widget.add_item(format!("  {}", c), PathBuf::from(entry.path())),
                     None        => {},
                 };
             }
