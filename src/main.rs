@@ -1,11 +1,26 @@
 extern crate marcos;
 extern crate cursive;
 extern crate clap;
+#[macro_use]extern crate failure;
 
 use clap::{Arg, App};
-use marcos::{core};
+
+use marcos::core;
+use marcos::error;
 
 fn main() {
+    if let Err(err) = try_main() {
+        println!("{}", error::failure_to_string(&err));
+        let backtrace = err.backtrace().to_string();
+        if !backtrace.trim().is_empty() {
+            eprintln!("{}", backtrace);
+        }
+        ::std::process::exit(1);
+    }
+}
+
+
+fn try_main() -> Result<(), failure::Error> {
     let matches = App::new("Marcos")
         .version("0.1.0")
         .author("Hitesh Paul")
@@ -44,6 +59,7 @@ fn main() {
     // }
     // let mut app = core::app::init().unwrap();
     // app.run();
+    Ok(())
 }
 
 

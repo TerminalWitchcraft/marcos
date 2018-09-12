@@ -1,11 +1,13 @@
 use log;
 use fern;
 
+use error::*;
+
 /// Initialize the looger.
 /// Currently lacks flexibility to specify log levels, output streams, etc
 ///
 /// TODO: Log level as input, output stream as input, default log file format
-pub fn init(file_name: Option<&str>, log_level: Option<&str>) -> Result<(), fern::InitError> {
+pub fn init(file_name: Option<&str>, log_level: Option<&str>) -> Result<()> {
     let logger = fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(

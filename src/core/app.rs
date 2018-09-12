@@ -3,7 +3,6 @@
 use std::env;
 use std::fs;
 use std::process;
-use std::error::Error;
 use std::path::{PathBuf};
 use std::collections::HashMap;
 
@@ -18,18 +17,15 @@ use alphanumeric_sort::compare_os_str;
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
-use uname::uname;
-use users::get_current_username;
-use systemstat::{ System, Platform };
-
 use utils::{ logger, filter, info};
 use ui::tab::{Tab};
+use error::*;
 
 
 /// Create a new instance of marcos with the specified backend.
 ///
 /// It also setups the logger for log events
-pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Result<App, Box<Error>> {
+pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Result<App> {
     logger::init(log_file, log_level)?;
     let path = match path {
         "." | "./" => env::current_dir()?,
@@ -101,7 +97,7 @@ impl App {
         }
     }
 
-    pub fn add_tab(&mut self, name: &str, path: PathBuf) -> Result<(), Box<Error>>{
+    pub fn add_tab(&mut self, name: &str, path: PathBuf) -> Result<()>{
         let tab = Tab::from(name, &path);
         self.vec_tabs.insert(name.to_string(), tab);
         self.focused_entry = name.to_string();
