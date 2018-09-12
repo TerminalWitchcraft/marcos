@@ -7,6 +7,7 @@ extern crate alphanumeric_sort;
 extern crate mime_guess;
 extern crate uname;
 extern crate users;
+extern crate systemstat;
 
 pub mod core;
 pub mod utils;

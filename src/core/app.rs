@@ -20,6 +20,7 @@ use mime_guess::Mime;
 
 use uname::uname;
 use users::get_current_username;
+use systemstat::{ System, Platform };
 
 use utils::logger;
 use utils::filter;
@@ -141,8 +142,13 @@ impl App {
                         .full_width()
                         .full_height()));
         let mut h_panes = LinearLayout::vertical();
+        let sys = System::new();
+        let mount_info: String = match sys.mount_at("/") {
+            Ok(mount) =>  format!("/ {} available of {}", mount.avail, mount.total),
+            Err(_)       => format!("Failed to get space information!")
+        };
         let udata = uname().unwrap();
-        h_panes.add_child(TextView::new(format!("{} @ {}",  get_current_username().unwrap_or("NA".to_string()), udata.nodename)).with_id("global/tabs"));
+        h_panes.add_child(TextView::new(format!("{} @ {} {}",  get_current_username().unwrap_or("NA".to_string()), udata.nodename, mount_info)).with_id("global/tabs"));
         h_panes.add_child(panes);
         //h_panes.add_child(TextView::new("Status").with_id("global/status"));
         let mut status_bar = HideableView::new(TextView::new("Status")
