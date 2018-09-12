@@ -18,6 +18,9 @@ use alphanumeric_sort::compare_os_str;
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
+use uname::uname;
+use users::get_current_username;
+
 use utils::logger;
 use utils::filter;
 use ui::tab::{Tab};
@@ -138,7 +141,8 @@ impl App {
                         .full_width()
                         .full_height()));
         let mut h_panes = LinearLayout::vertical();
-        h_panes.add_child(TextView::new("Tabs").with_id("global/tabs"));
+        let udata = uname().unwrap();
+        h_panes.add_child(TextView::new(format!("{} @ {}",  get_current_username().unwrap_or("NA".to_string()), udata.nodename)).with_id("global/tabs"));
         h_panes.add_child(panes);
         //h_panes.add_child(TextView::new("Status").with_id("global/status"));
         let mut status_bar = HideableView::new(TextView::new("Status")
