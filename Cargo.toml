@@ -3,6 +3,10 @@ name = "marcos"
 version = "0.1.0"
 authors = ["Hitesh Paul <hiteshpaul94@gmail.com>"]
 
+[[bin]]
+path = "src/main.rs"
+name = "mcf"
+
 [dependencies]
 log = "0.4"
 fern = "0.5"
