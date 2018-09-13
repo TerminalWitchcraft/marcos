@@ -2,6 +2,39 @@
 
 Command line file manager in Rust with VIM-inspired keybindings.
 
+## Key bindings
+
+Only some key bindings are implemented as of now. All mentioned key bindings will be implemented before `0.1.0` release.
+
+| Key      | Action                                                                                |
+|----------|---------------------------------------------------------------------------------------|
+| q        | Exit marcos                                                                           |
+| j        | Select item down                                                                      |
+| k        | Select item up                                                                        |
+| h        | Go previous (left)                                                                    |
+| l        | Go next(right)                                                                        |
+| :        | Activate command mode                                                                 |
+| gg       | Go to the first selection                                                             |
+| G        | Go to the last selection                                                              |
+| [count]G | Go to the [count] item                                                                |
+| za       | Toggle visibility of hidden items                                                     |
+| y        | Yank(Copy) the selected file/folder(Similar to Ctrl-c)                                |
+| x        | Cut the selected file/folder(similar to Ctrl-x)                                       |
+| p        | Paste the Copied/Cut file/folder(Similar to Ctrl-v)                                   |
+| r        | Rename selected file/folder                                                           |
+| dd*      | Delete selected file/folder(with confirmation)                                        |
+| o        | Create new file(`touch filename`)                                                     |
+| O        | Create new directory (`mkdir dirname`)                                                |
+| P        | Paste the Copied/Cut file/folder replacing existing with same name(with Confirmation) |
+| mX       | Create a bookmark with name X                                                         |
+| `X       | Jump to bookmark with name X                                                          |
+| n        | Move to next match                                                                    |
+| N        | Move to previous match                                                                |
+| /        | Search                                                                                |
+| v        | Starts visual mode, selects all files until you press ESC                             |
+| V        | Visual mode, select all                                                               |
+| Ctrl+r   | Refresh(listings, data, cache, etc)                                                   |
+| ESC      | Get me out!                                                                           |
 
 
 ## Design Goals
