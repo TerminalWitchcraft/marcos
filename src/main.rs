@@ -1,7 +1,7 @@
 extern crate marcos;
 extern crate cursive;
 extern crate clap;
-#[macro_use]extern crate failure;
+extern crate failure;
 
 use clap::{Arg, App};
 

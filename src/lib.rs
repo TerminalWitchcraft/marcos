@@ -66,6 +66,7 @@ extern crate uname;
 extern crate users;
 extern crate systemstat;
 extern crate failure;
+extern crate dirs;
 #[macro_use]extern crate failure_derive;
 
 pub mod error;

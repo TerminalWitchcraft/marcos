@@ -37,6 +37,9 @@ pub enum ErrorKind {
     #[fail(display = "IO Error")]
     Io(#[cause] io::Error),
 
+    #[fail(display = "Directory not found: {}", dirname)]
+    DirNotFound{dirname: String},
+
     #[fail(display = "Error while initializing logger!")]
     LogInitError(#[cause] SetLoggerError),
     // TODO handle generic error

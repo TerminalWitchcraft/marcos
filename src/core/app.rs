@@ -11,6 +11,8 @@ use cursive::views::*;
 use cursive::traits::{Identifiable, Boxable, Scrollable};
 use cursive::event::{Event,EventResult};
 
+use dirs;
+
 use walkdir::WalkDir;
 use alphanumeric_sort::compare_os_str;
 
@@ -38,7 +40,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
     }
-    let mut app = App::new();
+    let mut app = App::new()?;
     app.add_tab("1", path)?;
     Ok(app)
 }
@@ -61,13 +63,10 @@ impl App {
     /// `q` is used to quit the cursive instance.
     ///
     /// TODO `:` is used to open the command box
-    pub fn new() -> Self {
-        let data_path: PathBuf = env::var("XDG_CONFIG_HOME")
-            .map(|p| PathBuf::from(p).join("marcos"))
-            .unwrap_or_else(|_| {
-                let home = env::home_dir().expect("No Home directory");
-                home.join(".config").join("marcos")
-            });
+    pub fn new() -> Result<Self> {
+        let data_path: PathBuf = dirs::config_dir()
+            .ok_or(ErrorKind::DirNotFound{dirname: String::from("CONFIG_DIR")})?;
+        let data_path = data_path.join("marcos");
         if !data_path.exists() {
             fs::create_dir_all(&data_path)
                 .expect("Cannot create data_dir");
@@ -81,12 +80,12 @@ impl App {
 
         debug!("Loading theme resource file");
         siv.load_theme_file(asset_file).expect("Cannot find file!");
-        Self {
+        Ok(Self {
             siv,
             vec_tabs: HashMap::new(),
             focused_entry: String::new(),
             focused_tab: 0,
-        }
+        })
     }
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
