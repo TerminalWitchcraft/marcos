@@ -12,7 +12,7 @@ use systemstat::{ System, Platform};
 pub fn user_info() -> String {
     let user_name = get_current_username().unwrap_or("NA".to_string());
     let user_data = uname().unwrap();
-    format!("{} @ {}", user_name, user_data.nodename)
+    format!("{}@{}", user_name, user_data.nodename)
 }
 
 /// Function to get mount point info as a std::String in the form:
