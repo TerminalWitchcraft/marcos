@@ -77,14 +77,6 @@ impl App {
             fs::File::create(&asset_file).expect("Failed to create asset file");
         }
         let mut siv = Cursive::default();
-        // let mut stdout = stdout().into_raw_mode().unwrap();
-        //write!(stdout,"{}{}",
-        //        // Clear the screen.
-        //        termion::clear::All,
-        //        // Hide the cursor.
-        //        termion::cursor::Hide
-        //    ).unwrap();
-        // Add 'q' to global callback
         siv.add_global_callback(Event::CtrlChar('w'), |s| s.quit());
 
         debug!("Loading theme resource file");
@@ -97,7 +89,9 @@ impl App {
         }
     }
 
-    pub fn add_tab(&mut self, name: &str, path: PathBuf) -> Result<()>{
+    /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
+    /// for the sake of simplicity. Multiple tabs support will land in near future.
+    pub fn add_tab(&mut self, name: &str, path: PathBuf) -> Result<()> {
         let tab = Tab::from(name, &path);
         self.vec_tabs.insert(name.to_string(), tab);
         self.focused_entry = name.to_string();
@@ -121,8 +115,7 @@ impl App {
                 let cb = s.select_down(1);
                 Some(EventResult::Consumed(Some(cb)))
             });
-        let preview_content = current_tab.content_ref.clone();
-        let preview_widget = TextView::new_with_content(preview_content);
+        let preview_widget = TextView::new("Preview");
 
         let mut panes = LinearLayout::horizontal();
         panes.add_child(Panel::new(p_widget.with_id(format!("{}/parent", name))
@@ -155,6 +148,8 @@ impl App {
         Ok(())
     }
 
+    /// Returns a tuple of parent_view, which displays parent directory and current_view, which
+    /// displays contents of current directory.
     fn get_widget(tab: &Tab) -> (SelectView<PathBuf>, SelectView<PathBuf>) {
         let mut c_widget = SelectView::default();
         debug!("Start of first loop, c_widget");
@@ -239,19 +234,16 @@ impl App {
     pub fn run(&mut self) {
         self.siv.run();
     }
-
 }
 
 
 fn change_content(siv: &mut Cursive, entry: &PathBuf) {
     siv.call_on_id("preview", |view: &mut TextView| {
-        let mut content = String::new();
         if !entry.is_dir() {
             let data: Mime = guess_mime_type(entry);
-            content = format!("{}/{}", data.type_(), data.subtype());
+            view.set_content(format!("{}/{}", data.type_(), data.subtype()))
         } else {
-            content = "This is a directory!".to_string();
+            view.set_content("This is a directory!".to_string())
         }
-        view.set_content(content);
     });
 }

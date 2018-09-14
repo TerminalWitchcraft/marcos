@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use cursive::views::TextContent;
 
+/// Struct for holding path information for each view such as parent, current, preview.
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct View {
@@ -15,8 +15,10 @@ impl View {
     }
 }
 
+
+/// Struct to hold a collection of 3 views, according to miller's columns. First, being the
+/// previous directory, then second directory, followed by preview window.
 #[allow(dead_code)]
-// #[derive(Debug)]
 pub struct Tab {
     pub title: String,
     
@@ -29,12 +31,11 @@ pub struct Tab {
     p_selected: Vec<usize>,
     c_selected: Vec<usize>,
     preview_selected: Vec<usize>,
-    pub content_ref: TextContent,
 }
 
 
 impl Tab {
-    /// Funtion to create a tab from given name ana path
+    /// Funtion to create a tab from given name and path
     pub fn from(title: &str, path: &PathBuf) -> Self {
         let current_path = path;
         let parent_path = path.parent().unwrap().to_path_buf();
@@ -53,7 +54,6 @@ impl Tab {
             p_selected: Vec::new(),
             c_selected: Vec::new(),
             preview_selected: Vec::new(),
-            content_ref: TextContent::new("Contents"),
         }
     }
 
