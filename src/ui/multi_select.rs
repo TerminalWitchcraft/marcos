@@ -427,6 +427,9 @@ impl<T: 'static> MultiSelectView<T> {
             Event::Key(Key::End) => {
                 self.focus.set(self.items.len().saturating_sub(1))
             }
+            Event::Char('G') => {
+                self.focus.set(self.items.len().saturating_sub(1))
+            }
             Event::Mouse {
                 event: MouseEvent::Press(_),
                 position,
@@ -460,25 +463,25 @@ impl<T: 'static> MultiSelectView<T> {
             Event::Key(Key::Enter) if self.on_submit.is_some() => {
                 return self.submit();
             }
-            Event::Char(c) => {
-                // Starting from the current focus,
-                // find the first item that match the char.
-                // Cycle back to the beginning of
-                // the list when we reach the end.
-                // This is achieved by chaining twice the iterator
-                let iter = self.items.iter().chain(self.items.iter());
-                if let Some((i, _)) = iter
-                    .enumerate()
-                    .skip(self.focus() + 1)
-                    .find(|&(_, item)| item.label.starts_with(c))
-                {
-                    // Apply modulo in case we have a hit
-                    // from the chained iterator
-                    self.focus.set(i % self.items.len());
-                } else {
-                    return EventResult::Ignored;
-                }
-            }
+            // Event::Char(c) => {
+            //     // Starting from the current focus,
+            //     // find the first item that match the char.
+            //     // Cycle back to the beginning of
+            //     // the list when we reach the end.
+            //     // This is achieved by chaining twice the iterator
+            //     let iter = self.items.iter().chain(self.items.iter());
+            //     if let Some((i, _)) = iter
+            //         .enumerate()
+            //         .skip(self.focus() + 1)
+            //         .find(|&(_, item)| item.label.starts_with(c))
+            //     {
+            //         // Apply modulo in case we have a hit
+            //         // from the chained iterator
+            //         self.focus.set(i % self.items.len());
+            //     } else {
+            //         return EventResult::Ignored;
+            //     }
+            // }
             _ => return EventResult::Ignored,
         }
 
