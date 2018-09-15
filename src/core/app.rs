@@ -21,6 +21,7 @@ use mime_guess::Mime;
 
 use utils::{ logger, filter, info};
 use ui::tab::{Tab};
+use ui::multi_select::MultiSelectView;
 use error::*;
 
 
@@ -149,8 +150,8 @@ impl App {
 
     /// Returns a tuple of parent_view, which displays parent directory and current_view, which
     /// displays contents of current directory.
-    fn get_widget(tab: &Tab) -> (SelectView<PathBuf>, SelectView<PathBuf>) {
-        let mut c_widget = SelectView::default();
+    fn get_widget(tab: &Tab) -> (MultiSelectView<PathBuf>, MultiSelectView<PathBuf>) {
+        let mut c_widget = MultiSelectView::default();
         debug!("Start of first loop, c_widget");
         for entry in WalkDir::new(&tab.c_view.p_buff)
             .max_depth(1)
@@ -180,7 +181,7 @@ impl App {
                 };
             }
         c_widget.set_selection(0);
-        let mut p_widget = SelectView::default();
+        let mut p_widget = MultiSelectView::default();
         let mut i: usize = 0;
         debug!("Start of first loop with index, p_widget");
         for (index,entry) in WalkDir::new(&tab.p_view.p_buff)

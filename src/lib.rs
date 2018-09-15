@@ -68,6 +68,7 @@ extern crate systemstat;
 extern crate failure;
 extern crate dirs;
 #[macro_use]extern crate failure_derive;
+extern crate unicode_width;
 
 pub mod error;
 pub mod core;
