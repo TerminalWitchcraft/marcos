@@ -116,12 +116,22 @@ impl App {
         siv.add_layer(h_panes);
         siv.add_global_callback(Event::CtrlChar('w'), |s| s.quit());
         siv.add_global_callback('q', |s| s.quit());
+        let vec_tabs = Rc::new(RefCell::new(HashMap::<String, Tab>::new()));
+        let v_clone = vec_tabs.clone();
+        siv.add_global_callback('h', move |s: &mut Cursive| {
+            debug!("Inside global callback h");
+            if let Some(tab) = v_clone.borrow_mut().get_mut(&"1".to_string()) {
+                debug!("Inside v_clone callback h");
+                tab.go_back();
+                App::update_tab(s, &tab);
+            };
+        });
 
         debug!("Loading theme resource file");
         siv.load_theme_file(asset_file).expect("Cannot find file!");
         Ok(Self {
             siv,
-            vec_tabs: Rc::new(RefCell::new(HashMap::new())),
+            vec_tabs,
             focused_entry: String::new(),
             focused_tab: 0,
         })
@@ -260,6 +270,60 @@ impl App {
             view.set_selection(i);
             view.set_enabled(false);
             });
+    }
+
+    fn update_tab(siv: &mut Cursive, tab: &Tab) {
+        siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>|{
+            let view = event_view.get_inner_mut();
+            view.clear();
+            for entry in App::get_path_iter(&tab.c_view.p_buff)
+                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
+                    let entry = entry.unwrap();
+                    match entry.file_name().to_str() {
+                    Some(c)         => view.add_item(format!(r"  {}", c),
+                                            PathBuf::from(entry.path())),
+                    None            => {},
+                    }
+                }
+            for entry in App::get_path_iter(&tab.c_view.p_buff)
+                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                    let entry = entry.unwrap();
+                    match entry.file_name().to_str() {
+                    Some(c)         => view.add_item(format!(r"  {}", c),
+                                            PathBuf::from(entry.path())),
+                    None            => {},
+                    };
+                }
+            // TODO keep last selection
+            view.set_selection(0);
+        });
+
+        siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
+            view.clear();
+            let mut i: usize = 0;
+            for (index, entry) in App::get_path_iter(&tab.p_view.p_buff)
+                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
+                    let entry = entry.unwrap();
+                    if entry.path() == &tab.c_view.p_buff {
+                        i = index;
+                    }
+                    match entry.file_name().to_str() {
+                        Some(c)         => view.add_item(format!("  {}", c),
+                                                PathBuf::from(entry.path())),
+                        None            => {}
+                    };
+                }
+            for entry in App::get_path_iter(&tab.p_view.p_buff)
+                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                    let entry = entry.unwrap();
+                    match entry.file_name().to_str() {
+                        Some(c)     => view.add_item(format!("  {}", c),
+                                            PathBuf::from(entry.path())),
+                        None        => {},
+                    };
+                }
+            view.set_selection(i);
+        });
     }
 
     fn get_path_iter(path: &PathBuf) -> walkdir::IntoIter {

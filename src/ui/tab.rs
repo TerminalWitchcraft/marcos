@@ -38,6 +38,7 @@ pub struct Tab {
 impl Tab {
     /// Funtion to create a tab from given name and path
     pub fn from(title: &str, path: &PathBuf) -> Self {
+        // TODO too much assumptions here. Need to clarify.
         let current_path = path;
         let parent_path = path.parent().unwrap().to_path_buf();
         let preview_path = path.parent().unwrap().to_path_buf();
@@ -59,7 +60,13 @@ impl Tab {
     }
 
     pub fn go_back(&mut self) {
-        println!("hello");
+        let flag = self.c_view.p_buff.parent().is_some();
+        let curr_p = PathBuf::from(&self.c_view.p_buff);
+        let parent_p = PathBuf::from(&self.p_view.p_buff);
+        if flag {
+            self.c_view = View::from(&parent_p);
+            self.p_view = View::from(&parent_p.parent().unwrap().to_path_buf());
+        }
     }
 
 }
