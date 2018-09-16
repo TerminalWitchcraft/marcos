@@ -46,7 +46,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         process::exit(1);
     }
     let mut app = App::new()?;
-    app.add_tab("1", path)?;
+    app.add_tab(1, path)?;
     Ok(app)
 }
 
@@ -57,7 +57,7 @@ pub struct App {
     pub siv: Cursive,
     /// The vector of tabs
     // pub vec_tabs: HashMap<String, Tab>,
-    pub vec_tabs: Rc<RefCell<HashMap<String, Tab>>>,
+    pub vec_tabs: Rc<RefCell<HashMap<u32, Tab>>>,
     /// The index of focused tab starting from 0.
     focused_tab: usize,
     /// The index of focused entry starting from 0.
@@ -116,11 +116,11 @@ impl App {
         siv.add_layer(h_panes);
         siv.add_global_callback(Event::CtrlChar('w'), |s| s.quit());
         siv.add_global_callback('q', |s| s.quit());
-        let vec_tabs = Rc::new(RefCell::new(HashMap::<String, Tab>::new()));
+        let vec_tabs = Rc::new(RefCell::new(HashMap::<u32, Tab>::new()));
         let v_clone = vec_tabs.clone();
         siv.add_global_callback('h', move |s: &mut Cursive| {
             debug!("Inside global callback h");
-            if let Some(tab) = v_clone.borrow_mut().get_mut(&"1".to_string()) {
+            if let Some(tab) = v_clone.borrow_mut().get_mut(&1) {
                 debug!("Inside v_clone callback h");
                 tab.go_back();
                 App::update_tab(s, &tab);
@@ -139,7 +139,7 @@ impl App {
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
     /// for the sake of simplicity. Multiple tabs support will land in near future.
-    pub fn add_tab(&mut self, name: &str, path:PathBuf) -> Result<()> {
+    pub fn add_tab(&mut self, name: u32, path:PathBuf) -> Result<()> {
         let tab = Tab::from(name, &path);
         self.siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
             event_view.set_on_pre_event_inner('k', |s| {
@@ -152,7 +152,7 @@ impl App {
             });
             let view = event_view.get_inner_mut();
             view.clear();
-            for entry in App::get_path_iter(&tab.c_view.p_buff)
+            for entry in App::get_path_iter(&tab.c_view)
                 .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
@@ -161,7 +161,7 @@ impl App {
                     None            => {},
                     }
                 }
-            for entry in App::get_path_iter(&tab.c_view.p_buff)
+            for entry in App::get_path_iter(&tab.c_view)
                 .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
@@ -176,10 +176,10 @@ impl App {
         self.siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
             let mut i: usize = 0;
-            for (index, entry) in App::get_path_iter(&tab.p_view.p_buff)
+            for (index, entry) in App::get_path_iter(&tab.p_view)
                 .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
                     let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view.p_buff {
+                    if entry.path() == &tab.c_view {
                         i = index;
                     }
                     match entry.file_name().to_str() {
@@ -188,7 +188,7 @@ impl App {
                         None            => {}
                     };
                 }
-            for entry in App::get_path_iter(&tab.p_view.p_buff)
+            for entry in App::get_path_iter(&tab.p_view)
                 .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
@@ -200,7 +200,7 @@ impl App {
             view.set_selection(i);
             view.set_enabled(false);
         });
-        self.vec_tabs.borrow_mut().insert("1".to_string(), tab);
+        self.vec_tabs.borrow_mut().insert(1, tab);
         debug!("Value of arr: {:?}", self.vec_tabs.borrow());
         Ok(())
     }
@@ -211,7 +211,7 @@ impl App {
         siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
             let view  = event_view.get_inner_mut();
             view.clear();
-            for entry in WalkDir::new(&tab.c_view.p_buff)
+            for entry in WalkDir::new(&tab.c_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
@@ -223,7 +223,7 @@ impl App {
                         None        => {},
                     };
                 }
-            for entry in WalkDir::new(&tab.c_view.p_buff)
+            for entry in WalkDir::new(&tab.c_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
@@ -240,14 +240,14 @@ impl App {
         siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
             let mut i: usize = 0;
-            for (index,entry) in WalkDir::new(&tab.p_view.p_buff)
+            for (index,entry) in WalkDir::new(&tab.p_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
                 .into_iter()
                 .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
                     let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view.p_buff {
+                    if entry.path() == &tab.c_view {
                         i = index;
                     }
                     match entry.file_name().to_str() {
@@ -255,7 +255,7 @@ impl App {
                         None        => {},
                     };
                 }
-            for entry in WalkDir::new(&tab.p_view.p_buff)
+            for entry in WalkDir::new(&tab.p_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
@@ -276,7 +276,7 @@ impl App {
         siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>|{
             let view = event_view.get_inner_mut();
             view.clear();
-            for entry in App::get_path_iter(&tab.c_view.p_buff)
+            for entry in App::get_path_iter(&tab.c_view)
                 .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
@@ -285,7 +285,7 @@ impl App {
                     None            => {},
                     }
                 }
-            for entry in App::get_path_iter(&tab.c_view.p_buff)
+            for entry in App::get_path_iter(&tab.c_view)
                 .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
@@ -301,10 +301,10 @@ impl App {
         siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
             let mut i: usize = 0;
-            for (index, entry) in App::get_path_iter(&tab.p_view.p_buff)
+            for (index, entry) in App::get_path_iter(&tab.p_view)
                 .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
                     let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view.p_buff {
+                    if entry.path() == &tab.c_view {
                         i = index;
                     }
                     match entry.file_name().to_str() {
@@ -313,7 +313,7 @@ impl App {
                         None            => {}
                     };
                 }
-            for entry in App::get_path_iter(&tab.p_view.p_buff)
+            for entry in App::get_path_iter(&tab.p_view)
                 .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {

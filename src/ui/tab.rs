@@ -1,71 +1,51 @@
 use std::path::PathBuf;
 
-/// Struct for holding path information for each view such as parent, current, preview.
-#[allow(dead_code)]
-#[derive(Debug)]
-pub struct View {
-    pub p_buff: PathBuf,
-}
-
-impl View {
-    fn from(path: &PathBuf) -> Self {
-        Self {
-            p_buff: path.to_path_buf(),
-        }
-    }
-}
-
-
 /// Struct to hold a collection of 3 views, according to miller's columns. First, being the
 /// previous directory, then second directory, followed by preview window.
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Tab {
-    pub title: String,
+    pub title: u32,
     
     // Views
-    pub p_view: View,
-    pub c_view: View,
-    pub preview: View,
+    pub p_view: PathBuf,
+    pub c_view: PathBuf,
+    // pub preview: PathBuf,
 
     // Selected
     p_selected: Vec<usize>,
     c_selected: Vec<usize>,
-    preview_selected: Vec<usize>,
+    // preview_selected: Vec<usize>,
 }
 
 
 impl Tab {
     /// Funtion to create a tab from given name and path
-    pub fn from(title: &str, path: &PathBuf) -> Self {
+    pub fn from(title: u32, path: &PathBuf) -> Self {
         // TODO too much assumptions here. Need to clarify.
-        let current_path = path;
         let parent_path = path.parent().unwrap().to_path_buf();
-        let preview_path = path.parent().unwrap().to_path_buf();
+        let current_path = PathBuf::from(path);
 
-        let p_view = View::from(&parent_path);
-        let c_view = View::from(current_path);
-        let preview = View::from(&preview_path);
+        let p_view = parent_path;
+        let c_view = current_path;
 
         Self {
-            title: String::from(title),
+            title, 
             p_view,
             c_view,
-            preview,
 
             p_selected: Vec::new(),
             c_selected: Vec::new(),
-            preview_selected: Vec::new(),
         }
     }
 
     pub fn go_back(&mut self) {
-        let flag = self.c_view.p_buff.parent().is_some();
-        let curr_p = PathBuf::from(&self.c_view.p_buff);
-        let parent_p = PathBuf::from(&self.p_view.p_buff);
+        let flag = self.c_view.parent().is_some();
+        let _curr_p = PathBuf::from(&self.c_view);
+        let curr_p = PathBuf::from(&self.p_view);
         if flag {
-            self.c_view = View::from(&parent_p);
-            self.p_view = View::from(&parent_p.parent().unwrap().to_path_buf());
+            self.c_view = curr_p;
+            self.p_view = self.p_view.parent().unwrap().to_path_buf();
         }
     }
 
