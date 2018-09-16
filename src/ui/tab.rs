@@ -14,8 +14,8 @@ pub struct Tab {
     // pub preview: PathBuf,
 
     // Selected
-    p_selected: Vec<usize>,
-    c_selected: Vec<usize>,
+    // TODO Currently, based on index, need to change to PathBuf
+    pub p_focused: usize,
     // preview_selected: Vec<usize>,
 }
 
@@ -42,8 +42,7 @@ impl Tab {
             p_view,
             c_view,
 
-            p_selected: Vec::new(),
-            c_selected: Vec::new(),
+            p_focused: 0,
         })
     }
 

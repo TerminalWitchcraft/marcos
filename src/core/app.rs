@@ -60,7 +60,7 @@ pub struct App {
     /// The index of focused tab starting from 0.
     focused_tab: usize,
     /// The index of focused entry starting from 0.
-    focused_entry: String,
+    focused_entry: usize,
 }
 
 impl App {
@@ -120,10 +120,10 @@ impl App {
         let v_clone = vec_tabs.clone();
         siv.add_global_callback('h', move |s: &mut Cursive| {
             debug!("Inside global callback h");
-            if let Some(tab) = v_clone.borrow_mut().get_mut(&1) {
+            if let Some(mut tab) = v_clone.borrow_mut().get_mut(&1) {
                 debug!("Inside v_clone callback h");
                 tab.go_back();
-                App::update_tab(s, &tab);
+                App::update_tab(s, &mut tab);
             };
         });
 
@@ -132,7 +132,7 @@ impl App {
         Ok(Self {
             siv,
             vec_tabs,
-            focused_entry: String::new(),
+            focused_entry: 0,
             focused_tab: 0,
         })
     }
@@ -140,7 +140,7 @@ impl App {
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
     /// for the sake of simplicity. Multiple tabs support will land in near future.
     pub fn add_tab(&mut self, name: u32, path: PathBuf) -> Result<()> {
-        let tab = Tab::from(name, &path)?;
+        let mut tab = Tab::from(name, &path)?;
         self.siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
@@ -180,6 +180,7 @@ impl App {
             },
         );
 
+        let mut i: usize = 0;
         self.siv
             .call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
                 view.clear();
@@ -191,7 +192,6 @@ impl App {
                         view.set_selection(0);
                     }
                     Some(_) | None => {
-                        let mut i: usize = 0;
                         for (index, entry) in App::get_path_iter(&tab.p_view)
                             .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
                             .enumerate()
@@ -221,13 +221,15 @@ impl App {
                     } // None
                 };
             });
+        tab.p_focused = i;
         self.vec_tabs.borrow_mut().insert(1, tab);
+        self.focused_entry = i;
         debug!("Value of arr: {:?}", self.vec_tabs.borrow());
         Ok(())
     }
 
     #[allow(dead_code)]
-    fn update_widget(siv: &mut Cursive, tab: Tab) {
+    fn update_widget(siv: &mut Cursive, tab: &mut Tab) {
         debug!("Inside update_widget");
         siv.call_on_id(
             "current",
@@ -305,7 +307,8 @@ impl App {
         });
     }
 
-    fn update_tab(siv: &mut Cursive, tab: &Tab) {
+    fn update_tab(siv: &mut Cursive, tab: &mut Tab) {
+        let focused = tab.p_focused;
         siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
@@ -334,10 +337,11 @@ impl App {
                     };
                 }
                 // TODO keep last selection
-                view.set_selection(0);
+                view.set_selection(focused);
             },
         );
 
+        let mut i: usize = 0;
         siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
             match tab.p_view.to_str() {
@@ -346,7 +350,6 @@ impl App {
                     view.set_selection(0);
                 }
                 Some(_) | None => {
-                    let mut i: usize = 0;
                     for (index, entry) in App::get_path_iter(&tab.p_view)
                         .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
                         .enumerate()
@@ -377,6 +380,7 @@ impl App {
                 }
             }
         });
+        tab.p_focused = i;
     }
 
     fn get_path_iter(path: &PathBuf) -> walkdir::IntoIter {
