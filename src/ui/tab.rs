@@ -19,6 +19,7 @@ impl View {
 /// Struct to hold a collection of 3 views, according to miller's columns. First, being the
 /// previous directory, then second directory, followed by preview window.
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Tab {
     pub title: String,
     

@@ -24,8 +24,8 @@ unicode-width = "0.1.5"
 
 [dependencies.cursive]
 version = "0.9"
-default-features = true
-# features = ["termion-backend"]
+default-features = false
+features = ["termion-backend"]
 
 
 # Some crates to consider
