@@ -56,21 +56,23 @@
 //! | ESC      | Get me out!                                                                           |
 //! |          |                                                                                       |
 
-#[macro_use]extern crate log;
-extern crate cursive;
-extern crate fern;
-extern crate walkdir;
+#[macro_use]
+extern crate log;
 extern crate alphanumeric_sort;
+extern crate cursive;
+extern crate dirs;
+extern crate failure;
+extern crate fern;
 extern crate mime_guess;
+extern crate systemstat;
 extern crate uname;
 extern crate users;
-extern crate systemstat;
-extern crate failure;
-extern crate dirs;
-#[macro_use]extern crate failure_derive;
+extern crate walkdir;
+#[macro_use]
+extern crate failure_derive;
 extern crate unicode_width;
 
-pub mod error;
 pub mod core;
-pub mod utils;
+pub mod error;
 pub mod ui;
+pub mod utils;

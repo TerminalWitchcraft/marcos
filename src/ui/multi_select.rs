@@ -3,18 +3,18 @@ use cursive::direction::Direction;
 use cursive::event::{Callback, Event, EventResult, Key, MouseButton, MouseEvent};
 use cursive::menu::MenuTree;
 use cursive::rect::Rect;
-use std::borrow::Borrow;
-use std::cell::Cell;
-use std::cmp::min;
-use std::rc::Rc;
 use cursive::theme::ColorStyle;
-use unicode_width::UnicodeWidthStr;
 use cursive::vec::Vec2;
 use cursive::view::{Position, View};
 use cursive::views::MenuPopup;
 use cursive::Cursive;
 use cursive::Printer;
 use cursive::With;
+use std::borrow::Borrow;
+use std::cell::Cell;
+use std::cmp::min;
+use std::rc::Rc;
+use unicode_width::UnicodeWidthStr;
 
 /// View to select an item among a list.
 ///
@@ -418,18 +418,12 @@ impl<T: 'static> MultiSelectView<T> {
     fn on_event_regular(&mut self, event: Event) -> EventResult {
         match event {
             Event::Key(Key::Up) if self.focus() > 0 => self.focus_up(1),
-            Event::Key(Key::Down) if self.focus() + 1 < self.items.len() => {
-                self.focus_down(1)
-            }
+            Event::Key(Key::Down) if self.focus() + 1 < self.items.len() => self.focus_down(1),
             Event::Key(Key::PageUp) => self.focus_up(10),
             Event::Key(Key::PageDown) => self.focus_down(10),
             Event::Key(Key::Home) => self.focus.set(0),
-            Event::Key(Key::End) => {
-                self.focus.set(self.items.len().saturating_sub(1))
-            }
-            Event::Char('G') => {
-                self.focus.set(self.items.len().saturating_sub(1))
-            }
+            Event::Key(Key::End) => self.focus.set(self.items.len().saturating_sub(1)),
+            Event::Char('G') => self.focus.set(self.items.len().saturating_sub(1)),
             Event::Mouse {
                 event: MouseEvent::Press(_),
                 position,
@@ -437,9 +431,7 @@ impl<T: 'static> MultiSelectView<T> {
             }
                 if position
                     .checked_sub(offset)
-                    .map(|position| {
-                        position < self.last_size && position.y < self.len()
-                    })
+                    .map(|position| position < self.last_size && position.y < self.len())
                     .unwrap_or(false) =>
             {
                 self.focus.set(position.y - offset.y)
@@ -449,14 +441,10 @@ impl<T: 'static> MultiSelectView<T> {
                 position,
                 offset,
             }
-                if self.on_submit.is_some()
-                    && position
-                        .checked_sub(offset)
-                        .map(|position| {
-                            position < self.last_size
-                                && position.y == self.focus()
-                        })
-                        .unwrap_or(false) =>
+                if self.on_submit.is_some() && position
+                    .checked_sub(offset)
+                    .map(|position| position < self.last_size && position.y == self.focus())
+                    .unwrap_or(false) =>
             {
                 return self.submit();
             }
@@ -543,10 +531,8 @@ impl<T: 'static> MultiSelectView<T> {
             let current_offset = s.screen().offset();
             let offset = offset.signed() - current_offset;
             // And finally, put the view in view!
-            s.screen_mut().add_layer_at(
-                Position::parent(offset),
-                MenuPopup::new(tree).focus(focus),
-            );
+            s.screen_mut()
+                .add_layer_at(Position::parent(offset), MenuPopup::new(tree).focus(focus));
         })
     }
 
@@ -661,19 +647,17 @@ impl<T: 'static> View for MultiSelectView<T> {
             let printer = &printer.offset((0, offset));
 
             for i in 0..self.len() {
-                printer.offset((0, i)).with_selection(
-                    i == self.focus(),
-                    |printer| {
+                printer
+                    .offset((0, i))
+                    .with_selection(i == self.focus(), |printer| {
                         if i != self.focus() && !self.enabled {
-                            printer.with_color(
-                                ColorStyle::secondary(),
-                                |printer| self.draw_item(printer, i),
-                            );
+                            printer.with_color(ColorStyle::secondary(), |printer| {
+                                self.draw_item(printer, i)
+                            });
                         } else {
                             self.draw_item(printer, i);
                         }
-                    },
-                );
+                    });
             }
         }
     }

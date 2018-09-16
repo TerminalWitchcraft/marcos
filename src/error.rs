@@ -1,13 +1,12 @@
 //! Error handling for marcos file manager
 
-use std::{fmt, result};
 use std::io;
+use std::{fmt, result};
 
 use log::SetLoggerError;
 
 use failure;
-use failure::{Fail, Context, Backtrace};
-
+use failure::{Backtrace, Context, Fail};
 
 pub type Result<T> = result::Result<T, Error>;
 
@@ -32,13 +31,13 @@ impl fmt::Display for Error {
     }
 }
 
-#[derive(Debug,Fail)]
+#[derive(Debug, Fail)]
 pub enum ErrorKind {
     #[fail(display = "IO Error")]
     Io(#[cause] io::Error),
 
     #[fail(display = "Directory not found: {}", dirname)]
-    DirNotFound{dirname: String},
+    DirNotFound { dirname: String },
 
     #[fail(display = "Error while initializing logger!")]
     LogInitError(#[cause] SetLoggerError),
@@ -49,25 +48,31 @@ pub enum ErrorKind {
 
 impl From<ErrorKind> for Error {
     fn from(kind: ErrorKind) -> Error {
-        Error { inner: Context::new(kind)}
+        Error {
+            inner: Context::new(kind),
+        }
     }
 }
 
 impl From<Context<ErrorKind>> for Error {
     fn from(kind: Context<ErrorKind>) -> Error {
-        Error {inner: kind}
+        Error { inner: kind }
     }
 }
 
 impl From<io::Error> for Error {
     fn from(kind: io::Error) -> Error {
-        Error { inner: Context::new(ErrorKind::Io(kind))}
+        Error {
+            inner: Context::new(ErrorKind::Io(kind)),
+        }
     }
 }
 
 impl From<SetLoggerError> for Error {
     fn from(kind: SetLoggerError) -> Error {
-        Error { inner: Context::new(ErrorKind::LogInitError(kind))}
+        Error {
+            inner: Context::new(ErrorKind::LogInitError(kind)),
+        }
     }
 }
 

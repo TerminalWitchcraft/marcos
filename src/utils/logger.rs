@@ -1,5 +1,5 @@
-use log;
 use fern;
+use log;
 
 use error::*;
 
@@ -16,24 +16,22 @@ pub fn init(file_name: Option<&str>, log_level: Option<&str>) -> Result<()> {
                 record.level(),
                 message
             ))
-        })
-        .level_for("cursive", log::LevelFilter::Warn)
+        }).level_for("cursive", log::LevelFilter::Warn)
         .level(match log_level {
             Some(c) => match c {
                 "debug" => log::LevelFilter::Debug,
-                "info"  => log::LevelFilter::Info,
+                "info" => log::LevelFilter::Info,
                 "error" => log::LevelFilter::Error,
-                _       => log::LevelFilter::Off,
+                _ => log::LevelFilter::Off,
             },
-            None    => log::LevelFilter::Off,
+            None => log::LevelFilter::Off,
         });
-        //.chain(fern::log_file(file_name).expect("Incorrect Log file format"))
-        //.apply()?;
-        if let Some(c) = file_name {
-            logger.chain(fern::log_file(c)?)
-                .apply()?;
-        } else {
-            logger.apply()?;
-        }
+    //.chain(fern::log_file(file_name).expect("Incorrect Log file format"))
+    //.apply()?;
+    if let Some(c) = file_name {
+        logger.chain(fern::log_file(c)?).apply()?;
+    } else {
+        logger.apply()?;
+    }
     Ok(())
 }

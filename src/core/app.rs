@@ -1,33 +1,32 @@
 //! Module contains functions related to core functionalities of the app.
 
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::env;
 use std::fs;
+use std::path::PathBuf;
 use std::process;
 use std::rc::Rc;
-use std::cell::{RefCell};
-use std::path::{PathBuf};
-use std::collections::HashMap;
 
-use cursive::{Cursive};
-use cursive::views::*;
+use cursive::event::{Event, EventResult};
 #[allow(unused_imports)]
-use cursive::traits::{Identifiable, Boxable, Scrollable};
-use cursive::event::{Event,EventResult};
+use cursive::traits::{Boxable, Identifiable, Scrollable};
+use cursive::views::*;
+use cursive::Cursive;
 
 use dirs;
 
+use alphanumeric_sort::compare_os_str;
 use walkdir;
 use walkdir::WalkDir;
-use alphanumeric_sort::compare_os_str;
 
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
-use utils::{ logger, filter, info};
-use ui::tab::{Tab};
-use ui::multi_select::MultiSelectView;
 use error::*;
-
+use ui::multi_select::MultiSelectView;
+use ui::tab::Tab;
+use utils::{filter, info, logger};
 
 /// Create a new instance of marcos with the specified backend.
 ///
@@ -70,12 +69,12 @@ impl App {
     ///
     /// TODO `:` is used to open the command box
     pub fn new() -> Result<Self> {
-        let data_path: PathBuf = dirs::config_dir()
-            .ok_or(ErrorKind::DirNotFound{dirname: String::from("CONFIG_DIR")})?;
+        let data_path: PathBuf = dirs::config_dir().ok_or(ErrorKind::DirNotFound {
+            dirname: String::from("CONFIG_DIR"),
+        })?;
         let data_path = data_path.join("marcos");
         if !data_path.exists() {
-            fs::create_dir_all(&data_path)
-                .expect("Cannot create data_dir");
+            fs::create_dir_all(&data_path).expect("Cannot create data_dir");
         }
         let asset_file = data_path.join("style.toml");
         if !asset_file.is_file() {
@@ -85,8 +84,7 @@ impl App {
 
         // Create empty views
         let p_widget = MultiSelectView::<PathBuf>::new().with_id("parent");
-        let c_widget = MultiSelectView::<PathBuf>::new()
-            .on_select(change_content);
+        let c_widget = MultiSelectView::<PathBuf>::new().on_select(change_content);
         let c_widget = OnEventView::new(c_widget).with_id("current");
         let preview_widget = TextView::new("").with_id("preview");
         let top_bar = TextView::new(format!("{} {}", info::user_info(), info::disk_info("/")))
@@ -97,17 +95,19 @@ impl App {
 
         // Horizontal panes
         let mut panes = LinearLayout::horizontal();
-        panes.add_child(Panel::new(p_widget)
-                        .full_width()
-                        .max_width(30)
-                        .full_height());
-        panes.add_child(Panel::new(c_widget)
-                        .full_width()
-                        .max_width(40)
-                        .full_height());
-        panes.add_child(Panel::new(preview_widget)
-                        .full_width()
-                        .full_height());
+        panes.add_child(
+            Panel::new(p_widget)
+                .full_width()
+                .max_width(30)
+                .full_height(),
+        );
+        panes.add_child(
+            Panel::new(c_widget)
+                .full_width()
+                .max_width(40)
+                .full_height(),
+        );
+        panes.add_child(Panel::new(preview_widget).full_width().full_height());
         let h_panes = LinearLayout::vertical()
             .child(top_bar)
             .child(panes)
@@ -139,67 +139,88 @@ impl App {
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
     /// for the sake of simplicity. Multiple tabs support will land in near future.
-    pub fn add_tab(&mut self, name: u32, path:PathBuf) -> Result<()> {
-        let tab = Tab::from(name, &path);
-        self.siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
-            event_view.set_on_pre_event_inner('k', |s| {
-                let cb = s.select_up(1);
-                Some(EventResult::Consumed(Some(cb)))
-            });
-            event_view.set_on_pre_event_inner('j', |s| {
-                let cb = s.select_down(1);
-                Some(EventResult::Consumed(Some(cb)))
-            });
-            let view = event_view.get_inner_mut();
-            view.clear();
-            for entry in App::get_path_iter(&tab.c_view)
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
+    pub fn add_tab(&mut self, name: u32, path: PathBuf) -> Result<()> {
+        let tab = Tab::from(name, &path)?;
+        self.siv.call_on_id(
+            "current",
+            |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                event_view.set_on_pre_event_inner('k', |s| {
+                    let cb = s.select_up(1);
+                    Some(EventResult::Consumed(Some(cb)))
+                });
+                event_view.set_on_pre_event_inner('j', |s| {
+                    let cb = s.select_down(1);
+                    Some(EventResult::Consumed(Some(cb)))
+                });
+                let view = event_view.get_inner_mut();
+                view.clear();
+                for entry in App::get_path_iter(&tab.c_view)
+                    .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                    Some(c)         => view.add_item(format!(r"  {}", c),
-                                            PathBuf::from(entry.path())),
-                    None            => {},
+                        Some(c) => {
+                            view.add_item(format!(r"  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     }
                 }
-            for entry in App::get_path_iter(&tab.c_view)
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                for entry in App::get_path_iter(&tab.c_view)
+                    .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                    Some(c)         => view.add_item(format!(r"  {}", c),
-                                            PathBuf::from(entry.path())),
-                    None            => {},
+                        Some(c) => {
+                            view.add_item(format!(r"  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     };
                 }
-            view.set_selection(0);
-        });
+                view.set_selection(0);
+            },
+        );
 
-        self.siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
-            view.clear();
-            let mut i: usize = 0;
-            for (index, entry) in App::get_path_iter(&tab.p_view)
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
-                    let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view {
-                        i = index;
+        self.siv
+            .call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
+                view.clear();
+                debug!("siv call on id parent {:?}", tab.p_view.to_str());
+                match tab.p_view.to_str() {
+                    Some("root") => {
+                        view.add_item("/", PathBuf::from("/"));
+                        view.set_enabled(false);
+                        view.set_selection(0);
                     }
-                    match entry.file_name().to_str() {
-                        Some(c)         => view.add_item(format!("  {}", c),
-                                                PathBuf::from(entry.path())),
-                        None            => {}
-                    };
-                }
-            for entry in App::get_path_iter(&tab.p_view)
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
-                    let entry = entry.unwrap();
-                    match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!("  {}", c),
-                                            PathBuf::from(entry.path())),
-                        None        => {},
-                    };
-                }
-            view.set_selection(i);
-            view.set_enabled(false);
-        });
+                    Some(_) | None => {
+                        let mut i: usize = 0;
+                        for (index, entry) in App::get_path_iter(&tab.p_view)
+                            .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                            .enumerate()
+                        {
+                            let entry = entry.unwrap();
+                            if entry.path() == &tab.c_view {
+                                i = index;
+                            }
+                            match entry.file_name().to_str() {
+                                Some(c) => view
+                                    .add_item(format!("  {}", c), PathBuf::from(entry.path())),
+                                None => {}
+                            };
+                        }
+                        for entry in App::get_path_iter(&tab.p_view)
+                            .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+                        {
+                            let entry = entry.unwrap();
+                            match entry.file_name().to_str() {
+                                Some(c) => view
+                                    .add_item(format!("  {}", c), PathBuf::from(entry.path())),
+                                None => {}
+                            };
+                        }
+                        view.set_selection(i);
+                        view.set_enabled(false);
+                    } // None
+                };
+            });
         self.vec_tabs.borrow_mut().insert(1, tab);
         debug!("Value of arr: {:?}", self.vec_tabs.borrow());
         Ok(())
@@ -208,121 +229,153 @@ impl App {
     #[allow(dead_code)]
     fn update_widget(siv: &mut Cursive, tab: Tab) {
         debug!("Inside update_widget");
-        siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
-            let view  = event_view.get_inner_mut();
-            view.clear();
-            for entry in WalkDir::new(&tab.c_view)
-                .max_depth(1)
-                .min_depth(1)
-                .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
-                .into_iter()
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
+        siv.call_on_id(
+            "current",
+            |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                let view = event_view.get_inner_mut();
+                view.clear();
+                for entry in WalkDir::new(&tab.c_view)
+                    .max_depth(1)
+                    .min_depth(1)
+                    .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+                    .into_iter()
+                    .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!(r"  {}", c), PathBuf::from(entry.path())),
-                        None        => {},
+                        Some(c) => {
+                            view.add_item(format!(r"  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     };
                 }
-            for entry in WalkDir::new(&tab.c_view)
-                .max_depth(1)
-                .min_depth(1)
-                .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
-                .into_iter()
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                for entry in WalkDir::new(&tab.c_view)
+                    .max_depth(1)
+                    .min_depth(1)
+                    .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
+                    .into_iter()
+                    .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!("  {}", c), PathBuf::from(entry.path())),
-                        None        => {},
+                        Some(c) => {
+                            view.add_item(format!("  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     };
                 }
-            view.set_selection(0);
-        });
+                view.set_selection(0);
+            },
+        );
         siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
             let mut i: usize = 0;
-            for (index,entry) in WalkDir::new(&tab.p_view)
+            for (index, entry) in WalkDir::new(&tab.p_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
                 .into_iter()
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
-                    let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view {
-                        i = index;
-                    }
-                    match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!("  {}", c), PathBuf::from(entry.path())),
-                        None        => {},
-                    };
+                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                .enumerate()
+            {
+                let entry = entry.unwrap();
+                if entry.path() == &tab.c_view {
+                    i = index;
                 }
+                match entry.file_name().to_str() {
+                    Some(c) => view.add_item(format!("  {}", c), PathBuf::from(entry.path())),
+                    None => {}
+                };
+            }
             for entry in WalkDir::new(&tab.p_view)
                 .max_depth(1)
                 .min_depth(1)
                 .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
                 .into_iter()
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
-                    let entry = entry.unwrap();
-                    match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!("  {}", c), PathBuf::from(entry.path())),
-                        None        => {},
-                    };
-                }
+                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+            {
+                let entry = entry.unwrap();
+                match entry.file_name().to_str() {
+                    Some(c) => view.add_item(format!("  {}", c), PathBuf::from(entry.path())),
+                    None => {}
+                };
+            }
             view.set_selection(i);
             view.set_enabled(false);
-            });
+        });
     }
 
     fn update_tab(siv: &mut Cursive, tab: &Tab) {
-        siv.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>|{
-            let view = event_view.get_inner_mut();
-            view.clear();
-            for entry in App::get_path_iter(&tab.c_view)
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)) {
+        siv.call_on_id(
+            "current",
+            |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                let view = event_view.get_inner_mut();
+                view.clear();
+                for entry in App::get_path_iter(&tab.c_view)
+                    .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                    Some(c)         => view.add_item(format!(r"  {}", c),
-                                            PathBuf::from(entry.path())),
-                    None            => {},
+                        Some(c) => {
+                            view.add_item(format!(r"  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     }
                 }
-            for entry in App::get_path_iter(&tab.c_view)
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
+                for entry in App::get_path_iter(&tab.c_view)
+                    .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+                {
                     let entry = entry.unwrap();
                     match entry.file_name().to_str() {
-                    Some(c)         => view.add_item(format!(r"  {}", c),
-                                            PathBuf::from(entry.path())),
-                    None            => {},
+                        Some(c) => {
+                            view.add_item(format!(r"  {}", c), PathBuf::from(entry.path()))
+                        }
+                        None => {}
                     };
                 }
-            // TODO keep last selection
-            view.set_selection(0);
-        });
+                // TODO keep last selection
+                view.set_selection(0);
+            },
+        );
 
         siv.call_on_id("parent", |view: &mut MultiSelectView<PathBuf>| {
             view.clear();
-            let mut i: usize = 0;
-            for (index, entry) in App::get_path_iter(&tab.p_view)
-                .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e)).enumerate() {
-                    let entry = entry.unwrap();
-                    if entry.path() == &tab.c_view {
-                        i = index;
+            match tab.p_view.to_str() {
+                Some("root") => {
+                    view.add_item("/", PathBuf::from("/"));
+                    view.set_selection(0);
+                }
+                Some(_) | None => {
+                    let mut i: usize = 0;
+                    for (index, entry) in App::get_path_iter(&tab.p_view)
+                        .filter_entry(|e| e.path().is_dir() && !filter::is_hidden(e))
+                        .enumerate()
+                    {
+                        let entry = entry.unwrap();
+                        if entry.path() == &tab.c_view {
+                            i = index;
+                        }
+                        match entry.file_name().to_str() {
+                            Some(c) => {
+                                view.add_item(format!("  {}", c), PathBuf::from(entry.path()))
+                            }
+                            None => {}
+                        };
                     }
-                    match entry.file_name().to_str() {
-                        Some(c)         => view.add_item(format!("  {}", c),
-                                                PathBuf::from(entry.path())),
-                        None            => {}
-                    };
+                    for entry in App::get_path_iter(&tab.p_view)
+                        .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e))
+                    {
+                        let entry = entry.unwrap();
+                        match entry.file_name().to_str() {
+                            Some(c) => {
+                                view.add_item(format!("  {}", c), PathBuf::from(entry.path()))
+                            }
+                            None => {}
+                        };
+                    }
+                    view.set_selection(i);
                 }
-            for entry in App::get_path_iter(&tab.p_view)
-                .filter_entry(|e| e.path().is_file() && !filter::is_hidden(e)) {
-                    let entry = entry.unwrap();
-                    match entry.file_name().to_str() {
-                        Some(c)     => view.add_item(format!("  {}", c),
-                                            PathBuf::from(entry.path())),
-                        None        => {},
-                    };
-                }
-            view.set_selection(i);
+            }
         });
     }
 
@@ -333,7 +386,6 @@ impl App {
             .sort_by(|a, b| compare_os_str(&a.file_name(), &b.file_name()))
             .into_iter()
     }
-
 
     #[allow(dead_code)]
     fn add_layout(&mut self) {
@@ -347,7 +399,6 @@ impl App {
         self.siv.run();
     }
 }
-
 
 fn change_content(siv: &mut Cursive, entry: &PathBuf) {
     siv.call_on_id("preview", |view: &mut TextView| {
