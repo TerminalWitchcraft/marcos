@@ -120,11 +120,35 @@ impl App {
         let v_clone = vec_tabs.clone();
         siv.add_global_callback('h', move |s: &mut Cursive| {
             debug!("Inside global callback h");
+            // Get current_view selection index
+            let mut current_selection = None;
+            s.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                let view = event_view.get_inner();
+                current_selection = view.selected_id();
+            });
             if let Some(mut tab) = v_clone.borrow_mut().get_mut(&1) {
                 debug!("Inside v_clone callback h");
                 tab.go_back();
-                App::update_tab(s, &mut tab);
+                tab.c_focused = current_selection;
+                App::update_tab(s, &mut tab, false);
             };
+        });
+        let v_clone2 = vec_tabs.clone();
+        siv.add_global_callback('l', move |s: &mut Cursive| {
+            s.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                let event = event_view.get_inner_mut();
+                if let Some(path) = event.selection() {
+                    if path.is_dir() {
+                        if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
+                            debug!("Moving forward to path {:?}", path);
+                            tab.go_forward(path.to_path_buf());
+                        };
+                    } // if                 
+                };
+            });
+            if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
+                App::update_tab(s, &mut tab, true);
+            }
         });
 
         debug!("Loading theme resource file");
@@ -141,6 +165,10 @@ impl App {
     /// for the sake of simplicity. Multiple tabs support will land in near future.
     pub fn add_tab(&mut self, name: u32, path: PathBuf) -> Result<()> {
         let mut tab = Tab::from(name, &path)?;
+        self.siv.call_on_id("topbar", |view: &mut TextView| {
+            let mut current_text: TextContent = view.get_shared_content();
+            current_text.append(format!(" {}", path.to_str().unwrap()));
+        });
         self.siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
@@ -229,8 +257,11 @@ impl App {
     }
 
 
-    fn update_tab(siv: &mut Cursive, tab: &mut Tab) {
-        let focused = tab.p_focused;
+    fn update_tab(siv: &mut Cursive, tab: &mut Tab, forward: bool) {
+        let focused = if !forward { tab.p_focused } else {
+            if let Some(c) = tab.c_focused {c}
+            else {0}
+        };
         siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {

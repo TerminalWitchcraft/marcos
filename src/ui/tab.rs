@@ -16,6 +16,7 @@ pub struct Tab {
     // Selected
     // TODO Currently, based on index, need to change to PathBuf
     pub p_focused: usize,
+    pub c_focused: Option<usize>,
     // preview_selected: Vec<usize>,
 }
 
@@ -43,6 +44,7 @@ impl Tab {
             c_view,
 
             p_focused: 0,
+            c_focused: None,
         })
     }
 
@@ -68,5 +70,10 @@ impl Tab {
             None => {}
         }
         debug!("{:?}, {:?}", self.p_view, self.c_view);
+    }
+
+    pub fn go_forward(&mut self, path:PathBuf) {
+        self.c_view = PathBuf::from(&path);
+        self.p_view = path.parent().unwrap().to_path_buf();
     }
 }
