@@ -3,7 +3,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::env;
-use std::fs;
+use std::fs as stdfs;
 use std::path::PathBuf;
 use std::process;
 use std::rc::Rc;
@@ -24,6 +24,7 @@ use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
 use error::*;
+use fs::Entry;
 use ui::multi_select::MultiSelectView;
 use ui::tab::Tab;
 use utils::{filter, info, logger};
@@ -74,11 +75,11 @@ impl App {
         })?;
         let data_path = data_path.join("marcos");
         if !data_path.exists() {
-            fs::create_dir_all(&data_path).expect("Cannot create data_dir");
+            stdfs::create_dir_all(&data_path).expect("Cannot create data_dir");
         }
         let asset_file = data_path.join("style.toml");
         if !asset_file.is_file() {
-            fs::File::create(&asset_file).expect("Failed to create asset file");
+            stdfs::File::create(&asset_file).expect("Failed to create asset file");
         }
         let mut siv = Cursive::default();
 
@@ -365,5 +366,8 @@ fn change_content(siv: &mut Cursive, entry: &PathBuf) {
         } else {
             view.set_content("This is a directory!".to_string())
         }
+    });
+    siv.call_on_id("status", |view: &mut TextView| {
+        view.set_content(Entry::from(PathBuf::from(entry)).permission_string().unwrap());
     });
 }
