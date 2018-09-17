@@ -24,11 +24,13 @@ use unicode_width::UnicodeWidthStr;
 ///
 /// ```rust
 /// # extern crate cursive;
+/// # extern crate marcos;
 /// # use cursive::Cursive;
-/// # use cursive::views::{SelectView, Dialog, TextView};
+/// # use cursive::views::{Dialog, TextView};
 /// # use cursive::align::HAlign;
+/// # use marcos::ui::multi_select::MultiSelectView;
 /// # fn main() {
-/// let mut time_select = SelectView::new().h_align(HAlign::Center);
+/// let mut time_select = MultiSelectView::new().h_align(HAlign::Center);
 /// time_select.add_item("Short", 1);
 /// time_select.add_item("Medium", 5);
 /// time_select.add_item("Long", 10);
@@ -222,9 +224,12 @@ impl<T: 'static> MultiSelectView<T> {
     /// Gets an item at given idx or None.
     ///
     /// ```
+    /// extern crate cursive;
+    /// extern crate marcos;
     /// use cursive::Cursive;
-    /// use cursive::views::{SelectView, TextView};
-    /// let select = SelectView::new()
+    /// use cursive::views::{TextView};
+    /// use marcos::ui::multi_select::MultiSelectView;
+    /// let select = MultiSelectView::new()
     ///     .item("Short", 1);
     /// assert_eq!(select.get_item(0), Some(("Short", &1)));
     /// ```
@@ -373,10 +378,12 @@ impl<T: 'static> MultiSelectView<T> {
     /// You should run this callback with a `&mut Cursive`:
     ///
     /// ```rust
+    /// # extern crate cursive;
+    /// # extern crate marcos;
     /// # use cursive::Cursive;
-    /// # use cursive::views::SelectView;
+    /// # use marcos::ui::multi_select::MultiSelectView;
     /// # fn main() {}
-    /// fn select_up(siv: &mut Cursive, view: &mut SelectView<()>) {
+    /// fn select_up(siv: &mut Cursive, view: &mut MultiSelectView<()>) {
     ///     let cb = view.select_up(1);
     ///     cb(siv);
     /// }
@@ -581,8 +588,9 @@ impl MultiSelectView<String> {
     /// # Examples
     ///
     /// ```
-    /// # use cursive::views::SelectView;
-    /// let mut select_view = SelectView::new();
+    /// # extern crate marcos;
+    /// # use marcos::ui::multi_select::MultiSelectView;
+    /// let mut select_view = MultiSelectView::new();
     /// select_view.add_all_str(vec!["a", "b", "c"]);
     /// ```
     pub fn add_all_str<S, I>(&mut self, iter: I)
