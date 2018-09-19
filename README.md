@@ -1,4 +1,4 @@
-# Marcos [![Build Status](https://travis-ci.org/TerminalWitchcraft/marcos.svg?branch=master)](https://travis-ci.org/TerminalWitchcraft/marcos)
+# Marcos [![Build Status](https://travis-ci.org/TerminalWitchcraft/marcos.svg?branch=master)](https://travis-ci.org/TerminalWitchcraft/marcos) [![GitHub license](https://img.shields.io/github/license/TerminalWitchcraft/marcos.svg)](https://github.com/TerminalWitchcraft/marcos/blob/master/LICENSE)
 
 Command line file manager in Rust with VIM-inspired keybindings.
 
