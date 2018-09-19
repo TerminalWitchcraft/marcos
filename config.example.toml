@@ -1,0 +1,79 @@
+# Author: Hitesh Paul <github at hiteshpaul.com>
+# Example configuration file for Marcos file manager(https://github.com/TerminalWitchcraft/marcos)
+# All options are optional. If any option is missing, the default value is loaded at runtime.
+
+
+[marcos]
+
+	# Whether to show shadow around widgets. Possible values: true, false
+	shadow = false
+
+	# Type of borders. Possible values: "simple", "none", "outset"
+	borders = "simple"
+
+	# Metric to display size of various items. Possible values "bits", "bytes".
+	size = "bits"
+
+	# Show hidden files? Possible values: true, false
+	show_hidden = false
+
+	# Ask for confirmation when deleting modifying on disk? Possible values true, false
+	confirm = true
+
+	# Preview images? Possible values true, false
+	show_images = false
+
+	# Status bar position. Possible values: "top", "bottom"
+	status_position = "bottom"
+
+	# Shorten title. Possible value: any positive number which defines the number
+	# of directories to show. If set to 0, full path will be shown
+	shorten_title = 0
+
+	# [TODO] Sort. Possible values: "default", "size", "type", "atime"
+	# sort = "default"
+
+	# Preview max file size. Files larger than this size will not be previewed.
+	# Value in bytes.
+	preview_max_size = 102400
+
+	# Delay in ms. Marcos updates directories after the specified value.
+	delay_idle = 2000
+
+	# Show line number? Possible value: true, false
+	line_numbers = false
+
+# Display disk usage at specified mount point with display name.
+[mount.rootfs]
+	point = "/"
+
+
+[colors]
+
+	# Background color to use.
+	background = "black"
+
+	# If the value is an array, the first valid color will be used.
+	# If the terminal doesn't support custom color,
+	# non-base colors will be skipped.
+	shadow     = ["#000000", "black"]
+
+	# Color for each view, i.e. each of the _column_ which is displayed.
+	view       = "#d3d7cf"
+
+	# Array and simple values have the same effect.
+	primary   = ["#111111"]
+	secondary = "#EEEEEE"
+	tertiary  = "#444444"
+
+	# Hex values can use lower or uppercase.
+	# (base color MUST be lowercase)
+	title_primary   = "#ff5555"
+	title_secondary = "#ffff55"
+
+	# Lower precision values can use only 3 digits.
+	highlight          = "#F00"
+	highlight_inactive = "#5555FF"
+
+[bindings]
+# TODO
