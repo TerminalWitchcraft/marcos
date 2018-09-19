@@ -43,6 +43,9 @@
 	# Show line number? Possible value: true, false
 	line_numbers = false
 
+	# Show popup windows on confirmation?[Defaults to status_bar] Possible values: true, false
+	show_popup = true
+
 # Display disk usage at specified mount point with display name.
 [mount.rootfs]
 	point = "/"
