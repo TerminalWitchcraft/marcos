@@ -90,6 +90,7 @@ pub struct Entry {
     path: PathBuf,
 }
 
+/// Initialize from PathBuf
 impl From<PathBuf> for Entry {
     fn from(path: PathBuf) -> Self {
         Self {path}
@@ -98,6 +99,8 @@ impl From<PathBuf> for Entry {
 
 
 impl Entry {
+
+    /// Funtion which returns String representing permissions and owner of selected entry.
     pub fn permission_string(&self) -> Result<String> {
         let meta = self.path.metadata()?;
         let uid = meta.uid();

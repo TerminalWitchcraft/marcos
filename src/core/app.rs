@@ -78,6 +78,7 @@ impl App {
             stdfs::create_dir_all(&data_path).expect("Cannot create data_dir");
         }
         let asset_file = data_path.join("style.toml");
+        debug!("Loading theme from file: {:?}", asset_file);
         if !asset_file.is_file() {
             stdfs::File::create(&asset_file).expect("Failed to create asset file");
         }
@@ -258,6 +259,8 @@ impl App {
     }
 
 
+    /// Funtion which updates the content of `Tab` when you go forward or 
+    /// backward in a hierarchy.
     fn update_tab(siv: &mut Cursive, tab: &mut Tab, forward: bool) {
         let focused = if !forward { tab.p_focused } else {
             if let Some(c) = tab.c_focused {c}

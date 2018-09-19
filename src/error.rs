@@ -31,6 +31,7 @@ impl fmt::Display for Error {
     }
 }
 
+/// Kinds of error which need to be handled
 #[derive(Debug, Fail)]
 pub enum ErrorKind {
     #[fail(display = "IO Error")]

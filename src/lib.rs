@@ -41,7 +41,7 @@
 //! | x        | Cut the selected file/folder(similar to Ctrl-x)                                       |
 //! | p        | Paste the Copied/Cut file/folder(Similar to Ctrl-v)                                   |
 //! | r        | Rename selected file/folder                                                           |
-//! | dd*      | Delete selected file/folder(with confirmation)                                        |
+//! | dd       | Delete selected file/folder(with confirmation)                                        |
 //! | o        | Create new file(`touch filename`)                                                     |
 //! | O        | Create new directory (`mkdir dirname`)                                                |
 //! | P        | Paste the Copied/Cut file/folder replacing existing with same name(with Confirmation) |
