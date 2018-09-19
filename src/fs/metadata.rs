@@ -1,6 +1,12 @@
-use std::path::{PathBuf};
+//! This module contains code to retrieve metadata about file/directory such as permissions,
+//! owners, size, etc.
 use std::os::unix::fs::*;
+use std::path::PathBuf;
+
+use users::{get_user_by_uid, get_group_by_gid};
+
 use error::*;
+
 
 mod modes {
     pub type Mode = u32;
@@ -94,8 +100,13 @@ impl From<PathBuf> for Entry {
 impl Entry {
     pub fn permission_string(&self) -> Result<String> {
         let meta = self.path.metadata()?;
+        let uid = meta.uid();
+        let gid = meta.gid();
+        let uid = get_user_by_uid(uid).unwrap();
+        let gid = get_group_by_gid(gid).unwrap();
         let mut repr = String::with_capacity(10);
         if self.path.is_dir() {repr.push('d')} else {repr.push('-')}
-        Ok(repr + &Permissions::from(meta.mode()).to_string())
+        Ok(repr + &Permissions::from(meta.mode()).to_string() + &format!(" {}:{}",
+                                                                         uid.name(), gid.name()))
     }
 }

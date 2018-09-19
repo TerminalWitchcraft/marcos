@@ -25,8 +25,8 @@ use mime_guess::Mime;
 
 use error::*;
 use fs::Entry;
-use ui::multi_select::MultiSelectView;
-use ui::tab::Tab;
+use ui::MultiSelectView;
+use ui::Tab;
 use utils::{filter, info, logger};
 
 /// Create a new instance of marcos with the specified backend.
@@ -85,7 +85,7 @@ impl App {
 
         // Create empty views
         let p_widget = MultiSelectView::<PathBuf>::new().with_id("parent");
-        let c_widget = MultiSelectView::<PathBuf>::new().on_select(change_content);
+        let c_widget = MultiSelectView::<PathBuf>::new().on_select(update_info);
         let c_widget = OnEventView::new(c_widget).with_id("current");
         let preview_widget = TextView::new("").with_id("preview");
         let top_bar = TextView::new(format!("{} {}", info::user_info(), info::disk_info("/")))
@@ -358,7 +358,10 @@ impl App {
     }
 }
 
-fn change_content(siv: &mut Cursive, entry: &PathBuf) {
+/// Funtion to update status bar content and preview widget content on selection change.
+/// First the status bar is updated to show relevant permission details and size of file.
+/// Then preview is updated to reflect details about the selected entry.
+fn update_info(siv: &mut Cursive, entry: &PathBuf) {
     siv.call_on_id("preview", |view: &mut TextView| {
         if !entry.is_dir() {
             let data: Mime = guess_mime_type(entry);
