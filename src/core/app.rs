@@ -47,6 +47,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
     }
     let mut app = App::new()?;
     app.add_tab(1, path)?;
+    app.load_bindings();
     Ok(app)
 }
 
@@ -119,8 +120,21 @@ impl App {
         siv.add_global_callback(Event::CtrlChar('w'), |s| s.quit());
         siv.add_global_callback('q', |s| s.quit());
         let vec_tabs = Rc::new(RefCell::new(HashMap::<u32, Tab>::new()));
-        let v_clone = vec_tabs.clone();
-        siv.add_global_callback('h', move |s: &mut Cursive| {
+
+        debug!("Loading theme resource file");
+        siv.load_theme_file(asset_file).expect("Cannot find file!");
+        Ok(Self {
+            siv,
+            vec_tabs,
+            focused_entry: 0,
+            focused_tab: 0,
+        })
+    }
+
+    /// Funtion to load key-bindings.
+    pub fn load_bindings(&mut self) {
+        let v_clone = self.vec_tabs.clone();
+        self.siv.add_global_callback('h', move |s: &mut Cursive| {
             debug!("Inside global callback h");
             // Get current_view selection index
             let mut current_selection = None;
@@ -135,8 +149,9 @@ impl App {
                 App::update_tab(s, &mut tab, false);
             };
         });
-        let v_clone2 = vec_tabs.clone();
-        siv.add_global_callback('l', move |s: &mut Cursive| {
+
+        let v_clone2 = self.vec_tabs.clone();
+        self.siv.add_global_callback('l', move |s: &mut Cursive| {
             s.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
                 let event = event_view.get_inner_mut();
                 if let Some(path) = event.selection() {
@@ -153,14 +168,19 @@ impl App {
             }
         });
 
-        debug!("Loading theme resource file");
-        siv.load_theme_file(asset_file).expect("Cannot find file!");
-        Ok(Self {
-            siv,
-            vec_tabs,
-            focused_entry: 0,
-            focused_tab: 0,
-        })
+
+        self.siv.call_on_id(
+            "current",
+            |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                event_view.set_on_pre_event_inner('k', |s| {
+                    let cb = s.select_up(1);
+                    Some(EventResult::Consumed(Some(cb)))
+                });
+                event_view.set_on_pre_event_inner('j', |s| {
+                    let cb = s.select_down(1);
+                    Some(EventResult::Consumed(Some(cb)))
+                });
+            });
     }
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
@@ -174,14 +194,6 @@ impl App {
         self.siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
-                event_view.set_on_pre_event_inner('k', |s| {
-                    let cb = s.select_up(1);
-                    Some(EventResult::Consumed(Some(cb)))
-                });
-                event_view.set_on_pre_event_inner('j', |s| {
-                    let cb = s.select_down(1);
-                    Some(EventResult::Consumed(Some(cb)))
-                });
                 let view = event_view.get_inner_mut();
                 view.clear();
                 for entry in App::get_path_iter(&tab.c_view)
