@@ -1,0 +1,32 @@
+# Whether to show shadow around widgets. Possible values: true, false
+shadow = false
+
+# Type of borders. Possible values: "simple", "none", "outset"
+borders = "simple"
+
+[colors]
+
+	# Background color to use.
+	background = "black"
+
+	# If the value is an array, the first valid color will be used.
+	# If the terminal doesn't support custom color,
+	# non-base colors will be skipped.
+	shadow     = ["#000000", "black"]
+
+	# Color for each view, i.e. each of the _column_ which is displayed.
+	view       = "#d3d7cf"
+
+	# Array and simple values have the same effect.
+	primary   = ["#111111"]
+	secondary = "#EEEEEE"
+	tertiary  = "#444444"
+
+	# Hex values can use lower or uppercase.
+	# (base color MUST be lowercase)
+	title_primary   = "#ff5555"
+	title_secondary = "#ffff55"
+
+	# Lower precision values can use only 3 digits.
+	highlight          = "#F00"
+	highlight_inactive = "#5555FF"

@@ -3,6 +3,7 @@
 use std::io;
 use std::{fmt, result};
 
+use toml::de;
 use log::SetLoggerError;
 
 use failure;
@@ -43,6 +44,10 @@ pub enum ErrorKind {
     #[fail(display = "Error while initializing logger!")]
     LogInitError(#[cause] SetLoggerError),
     // TODO handle generic error
+
+    #[fail(display = "Toml deserialization error")]
+    TomlDeError(#[cause] de::Error),
+
     #[fail(display = "Generic Error")]
     GenericError,
 }
@@ -73,6 +78,14 @@ impl From<SetLoggerError> for Error {
     fn from(kind: SetLoggerError) -> Error {
         Error {
             inner: Context::new(ErrorKind::LogInitError(kind)),
+        }
+    }
+}
+
+impl From<de::Error> for Error {
+    fn from(kind: de::Error) -> Error {
+        Error {
+            inner: Context::new(ErrorKind::TomlDeError(kind)),
         }
     }
 }

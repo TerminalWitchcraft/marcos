@@ -8,6 +8,9 @@ path = "src/main.rs"
 name = "mcf"
 
 [dependencies]
+toml = "0.4"
+serde = "1.0"
+serde_derive = "1.0"
 log = "0.4"
 fern = "0.5"
 clap = "2"

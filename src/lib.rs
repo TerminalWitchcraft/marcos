@@ -71,6 +71,10 @@ extern crate walkdir;
 #[macro_use]
 extern crate failure_derive;
 extern crate unicode_width;
+extern crate toml;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 
 pub mod core;
 pub mod error;
