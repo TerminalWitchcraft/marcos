@@ -3,7 +3,7 @@
 # All options are optional. If any option is missing, the default value is loaded at runtime.
 
 
-[options]
+[Options]
 
 	# Metric to display size of various items. Possible values "bits", "bytes".
 	size = "bits"
@@ -46,7 +46,7 @@
 
 
 
-[key_maps]
+[KeyMaps]
 	# TODO
 	quit			= "q"
 	select_up		= "k"

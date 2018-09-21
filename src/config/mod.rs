@@ -9,7 +9,7 @@ use toml;
 
 
 #[derive(Serialize,Deserialize)]
-struct Config {
+pub struct Config {
     #[serde(default)]
     KeyMaps: keys::KeyMaps,
     #[serde(default)]

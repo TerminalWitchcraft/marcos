@@ -1,10 +1,9 @@
+use cursive::Cursive;
 use cursive::event::Event;
 use cursive::event::Key;
-use serde_derive;
 
 use error::*;
 
-#[derive(Serialize,Deserialize)]
 enum Modifier {
     // Shift is not included, as Capital letter denotes shift key usage!
     Alt,
@@ -18,13 +17,12 @@ enum Modifier {
     // Meta
 }
 
-#[derive(Serialize,Deserialize)]
 pub struct KeySequence {
     takes_count: bool,
     max_count: Option<i8>,
     modifier: Modifier,
     key: Vec<char>,
-    operation: String,
+    operation: fn(&mut Cursive),
 }
 
 impl KeySequence {
@@ -85,7 +83,6 @@ impl KeySequence {
     }
 }
 
-#[derive(Serialize,Deserialize)]
 pub enum KeyBindings {
     Quit(KeySequence),
     SelectUp(KeySequence),
@@ -115,7 +112,7 @@ pub enum KeyBindings {
     Refresh(KeySequence),
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct KeyMaps {
     quit: String,
     select_up: String,
@@ -148,32 +145,32 @@ pub struct KeyMaps {
 impl Default for KeyMaps {
     fn default() -> Self {
         Self {
-        quit: "q".to_string(),
-        select_up: "k".to_string(),
-        select_down: "j".to_string(),
-        // select_first		= "gg"
-        // select_last 		= "G"
-        // select_n		= "*g"
-        back: "h".to_string(),
-        forward: "l".to_string(),
-        prompt: ":".to_string(),
-        show_hidden: "za".to_string(),
-        yank: "y".to_string(),
-        cut: "x".to_string(),
-        paste: "p".to_string(),
-        paste_replace: "P".to_string(),
-        rename: "r".to_string(),
-        delete_with_cfm: "dd".to_string(),
-        new_file: "o".to_string(),
-        new_folder: "O".to_string(),
-        // create bookmark
-        // jumpto bookmark
-        search: "/".to_string(),
-        next_match: "n".to_string(),
-        previous_match: "N".to_string(),
-        visual: "v".to_string(),
-        visual_all: "V".to_string(),
-        refresh: "C-r".to_string(),
+            quit: "q".to_string(),
+            select_up: "k".to_string(),
+            select_down: "j".to_string(),
+            // select_first		= "gg"
+            // select_last 		= "G"
+            // select_n		= "*g"
+            back: "h".to_string(),
+            forward: "l".to_string(),
+            prompt: ":".to_string(),
+            show_hidden: "za".to_string(),
+            yank: "y".to_string(),
+            cut: "x".to_string(),
+            paste: "p".to_string(),
+            paste_replace: "P".to_string(),
+            rename: "r".to_string(),
+            delete_with_cfm: "dd".to_string(),
+            new_file: "o".to_string(),
+            new_folder: "O".to_string(),
+            // create bookmark
+            // jumpto bookmark
+            search: "/".to_string(),
+            next_match: "n".to_string(),
+            previous_match: "N".to_string(),
+            visual: "v".to_string(),
+            visual_all: "V".to_string(),
+            refresh: "C-r".to_string(),
         }
     }
 }

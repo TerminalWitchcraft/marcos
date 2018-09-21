@@ -24,6 +24,7 @@ use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
 use error::*;
+use config;
 use fs::Entry;
 use ui::MultiSelectView;
 use ui::Tab;
@@ -45,6 +46,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
     }
+    let app_config =  config::Config::load();
     let mut app = App::new()?;
     app.add_tab(1, path)?;
     app.load_bindings();
