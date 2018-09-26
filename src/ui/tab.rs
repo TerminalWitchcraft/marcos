@@ -1,5 +1,6 @@
 use error::*;
 use std::path::PathBuf;
+use std::collections::HashMap;
 
 /// Struct to hold a collection of 3 views, according to miller's columns. First, being the
 /// previous directory, then second directory, followed by preview window.
@@ -15,8 +16,9 @@ pub struct Tab {
 
     // Selected
     // TODO Currently, based on index, need to change to PathBuf
-    pub p_focused: usize,
-    pub c_focused: Option<usize>,
+    pub focused: HashMap<PathBuf, usize>,
+    // pub p_focused: usize,
+    // pub c_focused: Option<usize>,
     // preview_selected: Vec<usize>,
 }
 
@@ -43,8 +45,9 @@ impl Tab {
             p_view,
             c_view,
 
-            p_focused: 0,
-            c_focused: None,
+            focused: HashMap::new(),
+            // p_focused: 0,
+            // c_focused: None,
         })
     }
 

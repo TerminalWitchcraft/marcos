@@ -145,10 +145,10 @@ impl App {
                 current_selection = view.selected_id();
             });
             if let Some(mut tab) = v_clone.borrow_mut().get_mut(&1) {
-                debug!("Inside v_clone callback h");
+                tab.focused.insert(PathBuf::from(&tab.c_view), current_selection.unwrap_or(0));
                 tab.go_back();
-                tab.c_focused = current_selection;
-                App::update_tab(s, &mut tab, false);
+                // tab.c_focused = current_selection;
+                App::update_tab(s, &mut tab);
             };
         });
 
@@ -166,7 +166,7 @@ impl App {
                 };
             });
             if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
-                App::update_tab(s, &mut tab, true);
+                App::update_tab(s, &mut tab);
             }
         });
 
@@ -265,7 +265,9 @@ impl App {
                     } // None
                 };
             });
-        tab.p_focused = i;
+        tab.focused.insert(PathBuf::from(&tab.p_view), i);
+        // tab.p_focused = i;
+        debug!("Value of tab: {:?}", tab);
         self.vec_tabs.borrow_mut().insert(1, tab);
         self.focused_entry = i;
         debug!("Value of arr: {:?}", self.vec_tabs.borrow());
@@ -275,14 +277,16 @@ impl App {
 
     /// Funtion which updates the content of `Tab` when you go forward or 
     /// backward in a hierarchy.
-    fn update_tab(siv: &mut Cursive, tab: &mut Tab, forward: bool) {
-        let focused = if !forward { tab.p_focused } else {
-            if let Some(c) = tab.c_focused {c}
-            else {0}
-        };
+    fn update_tab(siv: &mut Cursive, tab: &mut Tab) {
+        // let focused = if !forward { tab.p_focused } else {
+        //     if let Some(c) = tab.c_focused {c}
+        //     else {0}
+        // };
         siv.call_on_id(
             "current",
             |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                let c_focused = tab.focused.get(&tab.c_view).unwrap_or(&0usize);
+                debug!("Got current selection of: {:?}", c_focused);
                 let view = event_view.get_inner_mut();
                 view.clear();
                 for entry in App::get_path_iter(&tab.c_view)
@@ -308,7 +312,8 @@ impl App {
                     };
                 }
                 // TODO keep last selection
-                view.set_selection(focused);
+                view.set_selection(*c_focused);
+                //view.set_selection(focused);
             },
         );
 
@@ -351,7 +356,9 @@ impl App {
                 }
             }
         });
-        tab.p_focused = i;
+        // tab.p_focused = i;
+        tab.focused.insert(PathBuf::from(&tab.p_view), i);
+        debug!("Updated focused for parent: {:?}", tab);
     }
 
     fn get_path_iter(path: &PathBuf) -> walkdir::IntoIter {
