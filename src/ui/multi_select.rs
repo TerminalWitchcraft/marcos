@@ -443,10 +443,22 @@ impl<T: 'static> MultiSelectView<T> {
             self.input_buffer.push(event.clone())
         }
         match self.input_buffer.as_slice() {
-            [Event::Char('g'), Event::Char('g')] => {self.focus.set(0);
-            self.input_buffer.clear();
-            return EventResult::Consumed(self.make_select_cb());
+            [Event::Char('g'), Event::Char('g')] => {
+                self.focus.set(0);
+                self.input_buffer.clear();
+                return EventResult::Consumed(self.make_select_cb());
             },
+            [Event::Char('G')] => {
+                let num = get_number(&self.input_num_buffer);
+                if num - 1 < self.items.len() {
+                    self.focus.set(num - 1);
+                } else {
+                    self.focus.set(self.items.len().saturating_sub(1));
+                }
+                self.input_buffer.clear();
+                self.input_num_buffer.clear();
+                return EventResult::Consumed(self.make_select_cb());
+            }
             _ => {},
         }
         match event {
@@ -784,7 +796,8 @@ fn get_number(seq: &Vec<usize>) -> usize {
 fn should_intercept(event: &Event) -> bool {
     match event {
         Event::Char('g') => return true,
-        _ => {}
+        Event::Char('G') => return true,
+        _ => {},
     }
     false
 }
