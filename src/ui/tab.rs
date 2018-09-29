@@ -1,6 +1,6 @@
 use error::*;
-use std::path::PathBuf;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 /// Struct to hold a collection of 3 views, according to miller's columns. First, being the
 /// previous directory, then second directory, followed by preview window.
@@ -75,7 +75,7 @@ impl Tab {
         debug!("{:?}, {:?}", self.p_view, self.c_view);
     }
 
-    pub fn go_forward(&mut self, path:PathBuf) {
+    pub fn go_forward(&mut self, path: PathBuf) {
         self.c_view = PathBuf::from(&path);
         self.p_view = path.parent().unwrap().to_path_buf();
     }

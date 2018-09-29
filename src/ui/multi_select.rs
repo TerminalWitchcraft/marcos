@@ -428,14 +428,15 @@ impl<T: 'static> MultiSelectView<T> {
         )
     }
 
-
     fn on_event_regular(&mut self, event: Event) -> EventResult {
         if is_numeric(&event) {
-            let number: Option<u32> = match event{
+            let number: Option<u32> = match event {
                 Event::Char(c) => c.to_digit(10),
-                _ => None
+                _ => None,
             };
-            if let Some(c) = number {self.input_num_buffer.push(c as usize)};
+            if let Some(c) = number {
+                self.input_num_buffer.push(c as usize)
+            };
             return EventResult::Ignored;
         }
 
@@ -447,7 +448,7 @@ impl<T: 'static> MultiSelectView<T> {
                 self.focus.set(0);
                 self.input_buffer.clear();
                 return EventResult::Consumed(self.make_select_cb());
-            },
+            }
             [Event::Char('G')] => {
                 let num = get_number(&self.input_num_buffer);
                 if num - 1 < self.items.len() {
@@ -459,7 +460,7 @@ impl<T: 'static> MultiSelectView<T> {
                 self.input_num_buffer.clear();
                 return EventResult::Consumed(self.make_select_cb());
             }
-            _ => {},
+            _ => {}
         }
         match event {
             Event::Key(Key::Esc) => self.input_num_buffer.clear(),
@@ -765,10 +766,11 @@ impl<T> Item<T> {
     }
 }
 
-
 fn is_numeric(event: &Event) -> bool {
     match event {
-        Event::Char(c) => if c.is_numeric() {return true},
+        Event::Char(c) => if c.is_numeric() {
+            return true;
+        },
         _ => {}
     }
     false
@@ -776,7 +778,9 @@ fn is_numeric(event: &Event) -> bool {
 
 fn is_alphabete(event: &Event) -> bool {
     match event {
-        Event::Char(c) => if c.is_alphabetic() {return true},
+        Event::Char(c) => if c.is_alphabetic() {
+            return true;
+        },
         _ => {}
     }
     false
@@ -786,18 +790,17 @@ fn get_number(seq: &Vec<usize>) -> usize {
     let mut ans = 0usize;
     let mut len = seq.len() as u32;
     for i in seq.into_iter() {
-        ans += i * 10usize.pow(len-1);
+        ans += i * 10usize.pow(len - 1);
         len -= 1;
     }
     ans
 }
 
-
 fn should_intercept(event: &Event) -> bool {
     match event {
         Event::Char('g') => return true,
         Event::Char('G') => return true,
-        _ => {},
+        _ => {}
     }
     false
 }

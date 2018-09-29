@@ -2,13 +2,12 @@ pub mod keys;
 pub mod options;
 use error::*;
 
+use dirs;
 use std::fs as stdfs;
 use std::path::PathBuf;
-use dirs;
 use toml;
 
-
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Config {
     #[serde(default)]
     KeyMaps: keys::KeyMaps,
@@ -17,7 +16,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> Result<Self>{
+    pub fn load() -> Result<Self> {
         let data_path: PathBuf = dirs::config_dir().ok_or(ErrorKind::DirNotFound {
             dirname: String::from("CONFIG_DIR"),
         })?;

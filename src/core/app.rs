@@ -23,8 +23,8 @@ use walkdir::WalkDir;
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
-use error::*;
 use config;
+use error::*;
 use fs::Entry;
 use ui::MultiSelectView;
 use ui::Tab;
@@ -46,7 +46,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
     }
-    let app_config =  config::Config::load();
+    let app_config = config::Config::load();
     let mut app = App::new()?;
     app.add_tab(1, path)?;
     app.load_bindings();
@@ -140,12 +140,16 @@ impl App {
             debug!("Inside global callback h");
             // Get current_view selection index
             let mut current_selection = None;
-            s.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
-                let view = event_view.get_inner();
-                current_selection = view.selected_id();
-            });
+            s.call_on_id(
+                "current",
+                |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                    let view = event_view.get_inner();
+                    current_selection = view.selected_id();
+                },
+            );
             if let Some(mut tab) = v_clone.borrow_mut().get_mut(&1) {
-                tab.focused.insert(PathBuf::from(&tab.c_view), current_selection.unwrap_or(0));
+                tab.focused
+                    .insert(PathBuf::from(&tab.c_view), current_selection.unwrap_or(0));
                 tab.go_back();
                 // tab.c_focused = current_selection;
                 App::update_tab(s, &mut tab);
@@ -154,22 +158,24 @@ impl App {
 
         let v_clone2 = self.vec_tabs.clone();
         self.siv.add_global_callback('l', move |s: &mut Cursive| {
-            s.call_on_id("current", |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
-                let event = event_view.get_inner_mut();
-                if let Some(path) = event.selection() {
-                    if path.is_dir() {
-                        if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
-                            debug!("Moving forward to path {:?}", path);
-                            tab.go_forward(path.to_path_buf());
-                        };
-                    } // if                 
-                };
-            });
+            s.call_on_id(
+                "current",
+                |event_view: &mut OnEventView<MultiSelectView<PathBuf>>| {
+                    let event = event_view.get_inner_mut();
+                    if let Some(path) = event.selection() {
+                        if path.is_dir() {
+                            if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
+                                debug!("Moving forward to path {:?}", path);
+                                tab.go_forward(path.to_path_buf());
+                            };
+                        } // if
+                    };
+                },
+            );
             if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
                 App::update_tab(s, &mut tab);
             }
         });
-
 
         self.siv.call_on_id(
             "current",
@@ -182,7 +188,8 @@ impl App {
                     let cb = s.select_down(1);
                     Some(EventResult::Consumed(Some(cb)))
                 });
-            });
+            },
+        );
     }
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
@@ -274,8 +281,7 @@ impl App {
         Ok(())
     }
 
-
-    /// Funtion which updates the content of `Tab` when you go forward or 
+    /// Funtion which updates the content of `Tab` when you go forward or
     /// backward in a hierarchy.
     fn update_tab(siv: &mut Cursive, tab: &mut Tab) {
         // let focused = if !forward { tab.p_focused } else {
@@ -395,6 +401,10 @@ fn update_info(siv: &mut Cursive, entry: &PathBuf) {
         }
     });
     siv.call_on_id("status", |view: &mut TextView| {
-        view.set_content(Entry::from(PathBuf::from(entry)).permission_string().unwrap());
+        view.set_content(
+            Entry::from(PathBuf::from(entry))
+                .permission_string()
+                .unwrap(),
+        );
     });
 }

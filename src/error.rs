@@ -3,8 +3,8 @@
 use std::io;
 use std::{fmt, result};
 
-use toml::de;
 use log::SetLoggerError;
+use toml::de;
 
 use failure;
 use failure::{Backtrace, Context, Fail};
@@ -44,7 +44,6 @@ pub enum ErrorKind {
     #[fail(display = "Error while initializing logger!")]
     LogInitError(#[cause] SetLoggerError),
     // TODO handle generic error
-
     #[fail(display = "Toml deserialization error")]
     TomlDeError(#[cause] de::Error),
 

@@ -70,15 +70,15 @@ extern crate users;
 extern crate walkdir;
 #[macro_use]
 extern crate failure_derive;
-extern crate unicode_width;
-extern crate toml;
 extern crate serde;
+extern crate toml;
+extern crate unicode_width;
 #[macro_use]
 extern crate serde_derive;
 
+pub mod config;
 pub mod core;
 pub mod error;
+pub mod fs;
 pub mod ui;
 pub mod utils;
-pub mod fs;
-pub mod config;

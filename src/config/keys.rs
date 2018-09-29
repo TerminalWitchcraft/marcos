@@ -1,6 +1,6 @@
-use cursive::Cursive;
 use cursive::event::Event;
 use cursive::event::Key;
+use cursive::Cursive;
 
 use error::*;
 
