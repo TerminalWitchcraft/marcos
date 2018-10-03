@@ -451,14 +451,17 @@ impl<T: 'static> MultiSelectView<T> {
             }
             [Event::Char('G')] => {
                 let num = get_number(&self.input_num_buffer);
-                if num - 1 < self.items.len() {
-                    self.focus.set(num - 1);
+                if num == 0 {
                 } else {
-                    self.focus.set(self.items.len().saturating_sub(1));
+                    if num - 1 < self.items.len() {
+                        self.focus.set(num - 1);
+                    } else {
+                        self.focus.set(self.items.len().saturating_sub(1));
+                    }
+                    self.input_buffer.clear();
+                    self.input_num_buffer.clear();
+                    return EventResult::Consumed(self.make_select_cb());
                 }
-                self.input_buffer.clear();
-                self.input_num_buffer.clear();
-                return EventResult::Consumed(self.make_select_cb());
             }
             _ => {}
         }
