@@ -474,6 +474,9 @@ impl<T: 'static> MultiSelectView<T> {
             Event::Key(Key::Home) => self.focus.set(0),
             Event::Key(Key::End) => self.focus.set(self.items.len().saturating_sub(1)),
             Event::Char('G') => self.focus.set(self.items.len().saturating_sub(1)),
+            // Event::Char('/') => {
+            //     debug!("You pressed search key!");
+            // },
             Event::Mouse {
                 event: MouseEvent::Press(_),
                 position,

@@ -8,10 +8,12 @@ use std::path::PathBuf;
 use std::process;
 use std::rc::Rc;
 
-use cursive::event::{Event, EventResult};
+use cursive::event::{Event, EventResult, Key};
 #[allow(unused_imports)]
 use cursive::traits::{Boxable, Identifiable, Scrollable};
 use cursive::views::*;
+use cursive::theme::*;
+use cursive::view::Position;
 use cursive::Cursive;
 
 use dirs;
@@ -96,6 +98,9 @@ impl App {
             .with_id("topbar");
         let mut status_bar = HideableView::new(TextView::new("Status").with_id("status"));
         status_bar.unhide();
+        // let console = EditView::new().filler(">").with_id("console");
+        // let console = HideableView::new(console);
+        // let console = console.with_id("console/vis");
         let status_bar = status_bar.with_id("status/vis");
 
         // Horizontal panes
@@ -116,6 +121,7 @@ impl App {
         let h_panes = LinearLayout::vertical()
             .child(top_bar)
             .child(panes)
+            // .child(console)
             .child(status_bar);
 
         siv.add_layer(h_panes);
@@ -190,6 +196,29 @@ impl App {
                 });
             },
         );
+
+        self.siv.add_global_callback('/', |c: &mut Cursive| {
+            debug!("You pressed search key");
+            c.add_layer(create_console("/"));
+            let s = c.screen_mut();
+            let l = LayerPosition::FromFront(0);
+            let pos = s.offset().saturating_add((9000, 9000));
+            let p = Position::absolute(pos);
+            s.reposition_layer(l, p);
+        });
+
+        // Cancels current action.
+        self.siv.add_global_callback(Event::Key(Key::Esc), |s: &mut Cursive| {
+            let mut exists: bool = false;
+            {
+                let stack_view = s.screen_mut();
+                if let Some(_data) = stack_view.get(LayerPosition::FromBack(1)) {
+                    debug!("Multiple layer found");
+                    exists = true;
+                }
+            }
+            if exists {s.pop_layer();}
+        });
     }
 
     /// [Experimental] Adds a new tab to the main view. Currently only single tab is supported
@@ -407,4 +436,19 @@ fn update_info(siv: &mut Cursive, entry: &PathBuf) {
                 .unwrap(),
         );
     });
+}
+
+fn create_console(prefix: &str) -> LinearLayout {
+    let prefix_view = TextView::new(prefix);
+    let edit_view = EditView::new().filler(" ")
+        .on_submit(|s, content| {
+            debug!("You entered {}", content);
+            s.pop_layer();
+        })
+        .style(ColorStyle::new(ColorType::from(PaletteColor::Background),
+        ColorType::from(PaletteColor::Primary))).with_id("console");
+    let layout = LinearLayout::horizontal()
+        .child(prefix_view)
+        .child(edit_view.full_width());
+    layout
 }
