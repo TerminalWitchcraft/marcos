@@ -207,6 +207,16 @@ impl App {
             s.reposition_layer(l, p);
         });
 
+        self.siv.add_global_callback('?', |c: &mut Cursive| {
+            debug!("You pressed search key");
+            c.add_layer(create_console("?"));
+            let s = c.screen_mut();
+            let l = LayerPosition::FromFront(0);
+            let pos = s.offset().saturating_add((9000, 9000));
+            let p = Position::absolute(pos);
+            s.reposition_layer(l, p);
+        });
+
         // Cancels current action.
         self.siv.add_global_callback(Event::Key(Key::Esc), |s: &mut Cursive| {
             let mut exists: bool = false;
