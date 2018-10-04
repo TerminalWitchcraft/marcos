@@ -12,6 +12,7 @@ use cursive::event::{Event, EventResult, Key};
 #[allow(unused_imports)]
 use cursive::traits::{Boxable, Identifiable, Scrollable};
 use cursive::views::*;
+use cursive::align::*;
 use cursive::theme::*;
 use cursive::view::Position;
 use cursive::Cursive;
@@ -94,8 +95,18 @@ impl App {
         let c_widget = MultiSelectView::<PathBuf>::new().on_select(update_info);
         let c_widget = OnEventView::new(c_widget).with_id("current");
         let preview_widget = TextView::new("").with_id("preview");
-        let top_bar = TextView::new(format!("{} {}", info::user_info(), info::disk_info("/")))
-            .with_id("topbar");
+        let top_widget = LinearLayout::horizontal()
+            .child(TextView::new(info::user_info())
+                   .h_align(HAlign::Left)
+                   .with_id("topbar/left"))
+            .child(TextView::new(info::user_info())
+                   .h_align(HAlign::Left)
+                   .with_id("topbar/center").full_width())
+            .child(TextView::new(info::disk_info("/"))
+                   .h_align(HAlign::Right)
+                   .with_id("topbar/right").full_width());
+        // let top_bar = TextView::new(format!("{} {}", info::user_info(), info::disk_info("/")))
+        //     .with_id("topbar");
         let mut status_bar = HideableView::new(TextView::new("Status").with_id("status"));
         status_bar.unhide();
         // let console = EditView::new().filler(">").with_id("console");
@@ -119,7 +130,7 @@ impl App {
         );
         panes.add_child(Panel::new(preview_widget).full_width().full_height());
         let h_panes = LinearLayout::vertical()
-            .child(top_bar)
+            .child(top_widget.full_width())
             .child(panes)
             // .child(console)
             .child(status_bar);
@@ -159,6 +170,10 @@ impl App {
                 tab.go_back();
                 // tab.c_focused = current_selection;
                 App::update_tab(s, &mut tab);
+                s.call_on_id("topbar/center", |view: &mut TextView| {
+                    let mut text: TextContent = view.get_shared_content();
+                    text.set_content(format!(" {}", tab.c_view.to_str().unwrap()));
+                });
             };
         });
 
@@ -180,6 +195,10 @@ impl App {
             );
             if let Some(mut tab) = v_clone2.borrow_mut().get_mut(&1) {
                 App::update_tab(s, &mut tab);
+                s.call_on_id("topbar/center", |view: &mut TextView| {
+                    let mut text = view.get_shared_content();
+                    text.set_content(format!(" {}",tab.c_view.to_str().unwrap()));
+                });
             }
         });
 
@@ -235,9 +254,9 @@ impl App {
     /// for the sake of simplicity. Multiple tabs support will land in near future.
     pub fn add_tab(&mut self, name: u32, path: PathBuf) -> Result<()> {
         let mut tab = Tab::from(name, &path)?;
-        self.siv.call_on_id("topbar", |view: &mut TextView| {
+        self.siv.call_on_id("topbar/center", |view: &mut TextView| {
             let mut current_text: TextContent = view.get_shared_content();
-            current_text.append(format!(" {}", path.to_str().unwrap()));
+            current_text.set_content(format!(" {}", path.to_str().unwrap()));
         });
         self.siv.call_on_id(
             "current",
