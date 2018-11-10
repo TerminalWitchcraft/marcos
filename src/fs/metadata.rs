@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use users::{get_group_by_gid, get_user_by_uid};
 
-use error::*;
+use crate::error::*;
 
 mod modes {
     pub type Mode = u32;

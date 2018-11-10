@@ -26,12 +26,12 @@ use walkdir::WalkDir;
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
-use config;
-use error::*;
-use fs::Entry;
-use ui::MultiSelectView;
-use ui::Tab;
-use utils::{filter, info, logger};
+use crate::config;
+use crate::error::*;
+use crate::fs::Entry;
+use crate::ui::MultiSelectView;
+use crate::ui::Tab;
+use crate::utils::{filter, info, logger};
 
 /// Create a new instance of marcos with the specified backend.
 ///
@@ -49,7 +49,7 @@ pub fn init(path: &str, log_file: Option<&str>, log_level: Option<&str>) -> Resu
         println!("Incorrect path or unaccessible directory! Please cheack PATH");
         process::exit(1);
     }
-    let app_config = config::Config::load();
+    let _app_config = config::Config::load();
     let mut app = App::new()?;
     app.add_tab(1, path)?;
     app.load_bindings();

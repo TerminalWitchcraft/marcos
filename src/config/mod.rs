@@ -1,6 +1,6 @@
 pub mod keys;
 pub mod options;
-use error::*;
+use crate::error::*;
 
 use dirs;
 use std::fs as stdfs;

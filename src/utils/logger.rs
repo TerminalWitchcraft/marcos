@@ -1,7 +1,7 @@
 use fern;
 use log;
 
-use error::*;
+use crate::error::*;
 
 /// Initialize the looger.
 /// Currently lacks flexibility to specify log levels, output streams, etc

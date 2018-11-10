@@ -2,7 +2,7 @@ use cursive::event::Event;
 use cursive::event::Key;
 use cursive::Cursive;
 
-use error::*;
+use crate::error::*;
 
 enum Modifier {
     // Shift is not included, as Capital letter denotes shift key usage!

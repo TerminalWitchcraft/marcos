@@ -2,6 +2,7 @@
 name = "marcos"
 version = "0.1.0"
 authors = ["Hitesh Paul <hiteshpaul94@gmail.com>"]
+edition = "2018"
 
 [[bin]]
 path = "src/main.rs"
