@@ -1,11 +1,15 @@
+
 pub mod keys;
 pub mod options;
 use crate::error::*;
 
-use dirs;
 use std::fs as stdfs;
 use std::path::PathBuf;
+
+use log::*;
+use dirs;
 use toml;
+use serde_derive::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {

@@ -56,25 +56,6 @@
 //! | ESC      | Get me out!                                                                           |
 //! |          |                                                                                       |
 
-#[macro_use]
-extern crate log;
-extern crate alphanumeric_sort;
-extern crate cursive;
-extern crate dirs;
-extern crate failure;
-extern crate fern;
-extern crate mime_guess;
-extern crate systemstat;
-extern crate uname;
-extern crate users;
-extern crate walkdir;
-#[macro_use]
-extern crate failure_derive;
-extern crate serde;
-extern crate toml;
-extern crate unicode_width;
-#[macro_use]
-extern crate serde_derive;
 
 pub mod config;
 pub mod core;

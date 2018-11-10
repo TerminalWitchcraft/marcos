@@ -1,8 +1,3 @@
-extern crate clap;
-extern crate cursive;
-extern crate failure;
-extern crate marcos;
-
 use clap::{App, Arg};
 
 use marcos::core;

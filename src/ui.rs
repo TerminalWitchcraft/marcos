@@ -1,3 +1,4 @@
+
 //! Contains structs and function to manipulate view of the file manager.
 pub mod multi_select;
 pub mod tab;

@@ -1,6 +1,8 @@
-use crate::error::*;
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+use log::*;
+use crate::error::*;
 
 /// Struct to hold a collection of 3 views, according to miller's columns. First, being the
 /// previous directory, then second directory, followed by preview window.

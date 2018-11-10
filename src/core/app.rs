@@ -26,6 +26,8 @@ use walkdir::WalkDir;
 use mime_guess::guess_mime_type;
 use mime_guess::Mime;
 
+use log::*;
+
 use crate::config;
 use crate::error::*;
 use crate::fs::Entry;

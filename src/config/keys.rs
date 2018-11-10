@@ -1,6 +1,7 @@
 use cursive::event::Event;
-use cursive::event::Key;
 use cursive::Cursive;
+
+use serde_derive::{Serialize, Deserialize};
 
 use crate::error::*;
 
