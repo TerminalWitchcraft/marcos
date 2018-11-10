@@ -146,6 +146,6 @@ impl Entry {
         }
         Ok(repr
             + &Permissions::from(meta.mode()).to_string()
-            + &format!(" {}:{}", uid.name(), gid.name()))
+            + &format!(" {}:{}", uid.name().to_str().unwrap(), gid.name().to_str().unwrap()))
     }
 }

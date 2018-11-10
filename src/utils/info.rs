@@ -2,6 +2,7 @@
 
 use std::fmt::Display;
 use std::path::Path;
+use std::ffi::OsString;
 
 use systemstat::{Platform, System};
 use uname::uname;
@@ -10,9 +11,9 @@ use users::get_current_username;
 /// Funtion to get user information as a String in the form:
 /// `username @ host`
 pub fn user_info() -> String {
-    let user_name = get_current_username().unwrap_or("NA".to_string());
+    let user_name = get_current_username().unwrap_or(OsString::from("NA"));
     let user_data = uname().unwrap();
-    format!("{}@{}", user_name, user_data.nodename)
+    format!("{}@{}", user_name.into_string().unwrap(), user_data.nodename)
 }
 
 /// Function to get mount point info as a std::String in the form:
