@@ -1,5 +1,4 @@
 use fern;
-use log;
 
 use crate::error::*;
 
