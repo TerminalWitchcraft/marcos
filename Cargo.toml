@@ -22,7 +22,7 @@ uname = "0.1.1"
 users = "0.8.0"
 systemstat = "0.1.3"
 failure = "0.1.2"
-failure_derive = "0.1.3"
+failure_derive = "0.1.5"
 dirs = "1.0.5"
 unicode-width = "0.1.5"
 
