@@ -27,7 +27,7 @@ dirs = "1.0.5"
 unicode-width = "0.1.5"
 
 [dependencies.cursive]
-version = "0.9"
+version = "0.15"
 default-features = false
 features = ["termion-backend"]
 
